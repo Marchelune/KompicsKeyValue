@@ -16,8 +16,10 @@ import se.sics.kompics.network.Network;
 import se.sics.kompics.timer.ScheduleTimeout;
 import se.sics.kompics.timer.Timeout;
 import se.sics.kompics.timer.Timer;
+import se.sics.kompics.ClassMatchedHandler;
 import simon.sormain.KeyValueStore.network.TAddress;
-
+import simon.sormain.KeyValueStore.network.TMessage;
+import se.sics.kompics.network.Transport;
 
 public class Epfd extends ComponentDefinition {
 
@@ -80,7 +82,7 @@ public class Epfd extends ComponentDefinition {
 					suspected.remove(p);
 					trigger(new Restore(p), epfd);
 				}
-				trigger(new HeartbeatRequestMessage(selfAddress,p), net);
+				trigger(new TMessage(selfAddress, p, Transport.TCP, new HeartbeatRequestMessage(seqnum)), net);
 			}
 			
 			alive = new HashSet<TAddress>();
@@ -90,16 +92,16 @@ public class Epfd extends ComponentDefinition {
 		}
 	};
 	
-	private Handler<HeartbeatRequestMessage> handleHeartbeatRequestMessage = new Handler<HeartbeatRequestMessage>() {
-		public void handle(HeartbeatRequestMessage event) {
-			trigger (new HeartbeatReplyMessage(selfAddress, event.getSource()), net);
+	ClassMatchedHandler<HeartbeatRequestMessage, TMessage> handleHeartbeatRequestMessage = new ClassMatchedHandler<HeartbeatRequestMessage, TMessage>() {
+		public void handle(HeartbeatRequestMessage content, TMessage context) {
+			trigger(new TMessage(selfAddress, context.getSource(), Transport.TCP, new HeartbeatReplyMessage(content.getSeqnum())), net);
 		}
-	}; 
+	};
 	
-	private Handler<HeartbeatReplyMessage> handleHeartbeatReplyMessage = new Handler<HeartbeatReplyMessage>() {
-		public void handle(HeartbeatReplyMessage event) {
-			TAddress p = event.getSource();
-			if(suspected.contains(p)) alive.add(p);
+	ClassMatchedHandler<HeartbeatReplyMessage, TMessage> handleHeartbeatReplyMessage = new ClassMatchedHandler<HeartbeatReplyMessage, TMessage>() {
+		public void handle(HeartbeatReplyMessage content, TMessage context) {
+			TAddress p = context.getSource();
+			if(suspected.contains(p) || seqnum == content.getSeqnum()) alive.add(p);
 		}
 	};
 }
