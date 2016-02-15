@@ -40,16 +40,27 @@ public class Epfd extends ComponentDefinition {
 	private final long initialDelay;
 	private final long deltaDelay;
 	
-	public Epfd(EpfdInit init) {
+	public Epfd() {
 		subscribe(handleStart, control);
 		subscribe(handleCheckTimeout, timer);
 		subscribe(handleHeartbeatReplyMessage, net);
 		subscribe(handleHeartbeatRequestMessage, net);
 		
-		selfAddress = init.getSelfAddress();
-		allAddresses = init.getAllAddresses();
-		initialDelay = init.getInitialDelay();
-		deltaDelay = init.getDeltaDelay();
+        this.selfAddress = config().getValue("keyvaluestore.self", TAddress.class);
+        TAddress addr1 = config().getValue("keyvaluestore.epfd.allAddr.addr1", TAddress.class);
+        TAddress addr2 = config().getValue("keyvaluestore.epfd.allAddr.addr2", TAddress.class);
+        TAddress addr3 = config().getValue("keyvaluestore.epfd.allAddr.addr3", TAddress.class);
+        TAddress addr4 = config().getValue("keyvaluestore.epfd.allAddr.addr4", TAddress.class);
+        TAddress addr5 = config().getValue("keyvaluestore.epfd.allAddr.addr5", TAddress.class);
+        Set<TAddress> Addrs = new HashSet<TAddress>();
+        Addrs.add(addr1);
+        Addrs.add(addr2);
+        Addrs.add(addr3);
+        Addrs.add(addr4);
+        Addrs.add(addr5);
+        this.allAddresses = Addrs;
+        this.initialDelay = config().getValue("keyvaluestore.epfd.initDelay", Long.class);
+        this.deltaDelay = config().getValue("keyvaluestore.epfd.deltaDelay", Long.class);
 	}
 	
 	private Handler<Start> handleStart = new Handler<Start>() {
@@ -69,23 +80,35 @@ public class Epfd extends ComponentDefinition {
 	private Handler<Timeout> handleCheckTimeout = new Handler<Timeout>() {
 		@Override
 		public void handle(Timeout event) {
-			HashSet<TAddress> intersection = alive;
+			HashSet<TAddress> intersection = new HashSet<TAddress>();
+			intersection.addAll(alive);
+			//logger.info("{} hello alive before inter: {}.", new Object[]{selfAddress, alive});
 			intersection.retainAll(suspected);
 			if(!intersection.isEmpty()) delay += deltaDelay;
+			//logger.info("{} hello alive: {}.", new Object[]{selfAddress, alive});
+			//logger.info("{} hello delay: {}.", new Object[]{selfAddress, delay});
+			
 			seqnum++;
 			for(Iterator<TAddress> i = allAddresses.iterator(); i.hasNext() ;) {
 				TAddress p = i.next();
 				if(!(alive.contains(p)) && !(suspected.contains(p)) ){
 					suspected.add(p);
+					//logger.info("{} suspects: {}.", new Object[]{selfAddress, p});
 					trigger(new Suspect(p), epfd);
 				}else if(intersection.contains(p)){
 					suspected.remove(p);
+					//logger.info("{} restores: {}.", new Object[]{selfAddress, p});
 					trigger(new Restore(p), epfd);
 				}
+				//logger.info("{} hello", new Object[]{selfAddress});
+				//System.out.println("Hello, port "+ selfAddress);
 				trigger(new TMessage(selfAddress, p, Transport.TCP, new HeartbeatRequestMessage(seqnum)), net);
 			}
 			
-			alive = new HashSet<TAddress>();
+			logger.info("{} hello suspected: {}.", new Object[]{selfAddress, suspected});
+			//alive = new HashSet<TAddress>();
+			alive.clear();
+			logger.info("{} ALIVE EMPTY", new Object[]{selfAddress, alive});
 			ScheduleTimeout st = new ScheduleTimeout(delay);
 			st.setTimeoutEvent(new CheckTimeout(st));
 			trigger(st, timer);
@@ -94,14 +117,20 @@ public class Epfd extends ComponentDefinition {
 	
 	ClassMatchedHandler<HeartbeatRequestMessage, TMessage> handleHeartbeatRequestMessage = new ClassMatchedHandler<HeartbeatRequestMessage, TMessage>() {
 		public void handle(HeartbeatRequestMessage content, TMessage context) {
+			
 			trigger(new TMessage(selfAddress, context.getSource(), Transport.TCP, new HeartbeatReplyMessage(content.getSeqnum())), net);
 		}
 	};
 	
 	ClassMatchedHandler<HeartbeatReplyMessage, TMessage> handleHeartbeatReplyMessage = new ClassMatchedHandler<HeartbeatReplyMessage, TMessage>() {
 		public void handle(HeartbeatReplyMessage content, TMessage context) {
+			//logger.info("{} got heartbeat from {}.", new Object[]{selfAddress, context.getSource()});
 			TAddress p = context.getSource();
-			if(suspected.contains(p) || seqnum == content.getSeqnum()) alive.add(p);
+			if(suspected.contains(p) || seqnum == content.getSeqnum()) {
+				//logger.info("{}:  {} is alive.", new Object[]{selfAddress, context.getSource()});
+				alive.add(p);
+				//logger.info("{}:  alive : {} ", new Object[]{selfAddress, alive});
+			}	
 		}
 	};
 }

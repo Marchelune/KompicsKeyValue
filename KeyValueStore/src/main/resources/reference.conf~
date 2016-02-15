@@ -1,0 +1,33 @@
+keyvaluestore{
+	self {
+		host = "192.168.1.3"
+		port = 45671
+	}
+
+	epdf{
+		allAddr {
+			addr1 {
+				host = "192.168.1.3"
+				port = 45671
+			}
+			addr2 {
+				host = "192.168.1.3"
+				port = 45672
+			}
+			addr3 {
+				host = "192.168.1.3"
+				port = 45673
+			}
+			addr4 {
+				host = "192.168.1.3"
+				port = 45674
+			}		
+			addr5 {
+				host = "192.168.1.3"
+				port = 45675
+			}
+		}
+		initDelay = 3000
+		deltaDelay = 800
+	}
+}
