@@ -41,7 +41,7 @@ public class BEBroadcastComponent extends ComponentDefinition {
 		@Override
 		public void handle(BEBroadcast event) {
 			for(TAddress dst : event.getDst()){
-				trigger(new TMessage(event.getSrc(), dst, Transport.TCP, new BEDeliver(event.getPayload())), net);
+				trigger(new TMessage(event.getSrc(), dst, Transport.TCP, new BEDeliver(event.getPayload(),event.getSrc())), net);
 				//using BEDeliver here to convey and encapsulate the message to be able to pattern-march it 
 			}
 			

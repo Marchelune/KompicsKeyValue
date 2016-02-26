@@ -9,12 +9,20 @@ public class BEDeliver implements KompicsEvent , PatternExtractor<Class, Kompics
 	
 
 	private final KompicsEvent payload;
+	private final TAddress src;
 
-	public BEDeliver( KompicsEvent payload) {
-		this.payload = payload;
-	}
 
 	
+	public BEDeliver(KompicsEvent payload, TAddress src) {
+		this.payload = payload;
+		this.src = src;
+	}
+
+
+	public TAddress getSrc() {
+		return src;
+	}
+
 	public KompicsEvent getPayload() {
 		return payload;
 	}
