@@ -5,6 +5,7 @@ import se.sics.kompics.config.Conversions;
 import se.sics.kompics.network.netty.serialization.Serializers;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.network.TAddressConverter;
+import simon.sormain.KeyValueStore.network.SetTAddressConverter;
 import simon.sormain.KeyValueStore.network.THeader;
 import simon.sormain.KeyValueStore.network.TMessage;
 import simon.sormain.KeyValueStore.system.NodeParent;
@@ -15,11 +16,12 @@ public class Main {
 
         // conversions
         Conversions.register(new TAddressConverter());
+        Conversions.register(new SetTAddressConverter());
     }
     
     
     public static void main(String[] args) {
-                Kompics.createAndStart(NodeHost.class, 2);
+                Kompics.createAndStart(NodeLaunch.class, 2);
                 System.out.println("Starting Node");
                 try {
                     Thread.sleep(10000);

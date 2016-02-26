@@ -17,8 +17,8 @@ import se.sics.kompics.timer.ScheduleTimeout;
 import se.sics.kompics.timer.Timeout;
 import se.sics.kompics.timer.Timer;
 import se.sics.kompics.ClassMatchedHandler;
-import simon.sormain.KeyValueStore.network.TAddress;
-import simon.sormain.KeyValueStore.network.TMessage;
+import simon.sormain.KeyValueStore.network.*;
+
 import se.sics.kompics.network.Transport;
 
 public class Epfd extends ComponentDefinition {
@@ -47,18 +47,20 @@ public class Epfd extends ComponentDefinition {
 		subscribe(handleHeartbeatRequestMessage, net);
 		
         this.selfAddress = config().getValue("keyvaluestore.self", TAddress.class);
-        TAddress addr1 = config().getValue("keyvaluestore.epfd.allAddr.addr1", TAddress.class);
-        TAddress addr2 = config().getValue("keyvaluestore.epfd.allAddr.addr2", TAddress.class);
-        TAddress addr3 = config().getValue("keyvaluestore.epfd.allAddr.addr3", TAddress.class);
-        TAddress addr4 = config().getValue("keyvaluestore.epfd.allAddr.addr4", TAddress.class);
-        TAddress addr5 = config().getValue("keyvaluestore.epfd.allAddr.addr5", TAddress.class);
-        Set<TAddress> Addrs = new HashSet<TAddress>();
-        Addrs.add(addr1);
-        Addrs.add(addr2);
-        Addrs.add(addr3);
-        Addrs.add(addr4);
-        Addrs.add(addr5);
-        this.allAddresses = Addrs;
+        //TAddress addr1 = config().getValue("keyvaluestore.epfd.allAddr.addr1", TAddress.class);
+        //TAddress addr2 = config().getValue("keyvaluestore.epfd.allAddr.addr2", TAddress.class);
+        //TAddress addr3 = config().getValue("keyvaluestore.epfd.allAddr.addr3", TAddress.class);
+        //TAddress addr4 = config().getValue("keyvaluestore.epfd.allAddr.addr4", TAddress.class);
+        //TAddress addr5 = config().getValue("keyvaluestore.epfd.allAddr.addr5", TAddress.class);
+        //ListTAddress Addrs = new HashSet<TAddress>();
+        //Addrs.add(addr1);
+        //Addrs.add(addr2);
+        //Addrs.add(addr3);
+        //Addrs.add(addr4);
+        //Addrs.add(addr5);
+        //this.allAddresses = Addrs;
+        SetTAddress alladdr = config().getValue("keyvaluestore.epfd.allAddr", SetTAddress.class);
+        this.allAddresses = alladdr.get();
         this.initialDelay = config().getValue("keyvaluestore.epfd.initDelay", Long.class);
         this.deltaDelay = config().getValue("keyvaluestore.epfd.deltaDelay", Long.class);
 	}
@@ -66,6 +68,7 @@ public class Epfd extends ComponentDefinition {
 	private Handler<Start> handleStart = new Handler<Start>() {
 		public void handle(Start event) {
 			logger.info("EPFD starting ...");
+			logger.info("{} I know : {}", new Object[]{selfAddress, allAddresses});
 			seqnum = 0;
 			suspected = new HashSet<TAddress>();
 			alive = new HashSet<TAddress>(allAddresses);
@@ -124,7 +127,7 @@ public class Epfd extends ComponentDefinition {
 	
 	ClassMatchedHandler<HeartbeatReplyMessage, TMessage> handleHeartbeatReplyMessage = new ClassMatchedHandler<HeartbeatReplyMessage, TMessage>() {
 		public void handle(HeartbeatReplyMessage content, TMessage context) {
-			//logger.info("{} got heartbeat from {}.", new Object[]{selfAddress, context.getSource()});
+			logger.info("{} got heartbeat from {}.", new Object[]{selfAddress, context.getSource()});
 			TAddress p = context.getSource();
 			if(suspected.contains(p) || seqnum == content.getSeqnum()) {
 				//logger.info("{}:  {} is alive.", new Object[]{selfAddress, context.getSource()});

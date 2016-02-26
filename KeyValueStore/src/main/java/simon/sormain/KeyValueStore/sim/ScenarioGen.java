@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.io.*;
 
 import se.sics.kompics.Init;
 import se.sics.kompics.network.Address;
@@ -19,9 +20,10 @@ import se.sics.kompics.simulator.events.system.KillNodeEvent;
 import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.util.GlobalView;
-import simon.sormain.KeyValueStore.network.TAddress;
 //import se.sics.test.sim.SimulationObserver;
-import simon.sormain.KeyValueStore.system.NodeParent;
+import simon.sormain.KeyValueStore.network.*;
+import simon.sormain.KeyValueStore.system.*;
+
 
 
 public class ScenarioGen {
@@ -80,22 +82,28 @@ public class ScenarioGen {
         public StartNodeEvent generate(final Long self) {
             return new StartNodeEvent() {
                 TAddress selfAdr;
-                TAddress addr1;
-                TAddress addr2;
-                TAddress addr3;
-                TAddress addr4;
-                TAddress addr5;
+                //TAddress addr1;
+                //TAddress addr2;
+                //TAddress addr3;
+                //TAddress addr4;
+                //TAddress addr5;
+                SetTAddress allAddr = new SetTAddress();
                 long initialDelay = 1000;
                 long deltaDelay = 500;
 
                 {
                     try {
                         selfAdr = new TAddress(InetAddress.getByName("192.168.0." + self), 10000);
-                        addr1 = new TAddress(InetAddress.getByName("192.168.0.1"), 10000);
-                        addr2 = new TAddress(InetAddress.getByName("192.168.0.2"), 10000);
-                        addr3 = new TAddress(InetAddress.getByName("192.168.0.3"), 10000);
-                        addr4 = new TAddress(InetAddress.getByName("192.168.0.4"), 10000);
-                        addr5 = new TAddress(InetAddress.getByName("192.168.0.5"), 10000);
+                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 10000));
+                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.2"), 10000));
+                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.3"), 10000));
+                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.4"), 10000));
+                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.5"), 10000));
+                        //addr1 = new TAddress(InetAddress.getByName("192.168.0.1"), 10000);
+                        //addr2 = new TAddress(InetAddress.getByName("192.168.0.2"), 10000);
+                        //addr3 = new TAddress(InetAddress.getByName("192.168.0.3"), 10000);
+                        //addr4 = new TAddress(InetAddress.getByName("192.168.0.4"), 10000);
+                        //addr5 = new TAddress(InetAddress.getByName("192.168.0.5"), 10000);
                     } catch (UnknownHostException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -105,11 +113,12 @@ public class ScenarioGen {
                 public Map<String, Object> initConfigUpdate() {
                     HashMap<String, Object> config = new HashMap<String, Object>();
                     config.put("keyvaluestore.self", selfAdr);
-                    config.put("keyvaluestore.epfd.allAddr.addr1", addr1);
-                    config.put("keyvaluestore.epfd.allAddr.addr2", addr2);
-                    config.put("keyvaluestore.epfd.allAddr.addr3", addr3);
-                    config.put("keyvaluestore.epfd.allAddr.addr4", addr4);
-                    config.put("keyvaluestore.epfd.allAddr.addr5", addr5);
+                    //config.put("keyvaluestore.epfd.allAddr.addr1", addr1);
+                    //config.put("keyvaluestore.epfd.allAddr.addr2", addr2);
+                    //config.put("keyvaluestore.epfd.allAddr.addr3", addr3);
+                    //config.put("keyvaluestore.epfd.allAddr.addr4", addr4);
+                    //config.put("keyvaluestore.epfd.allAddr.addr5", addr5);
+                    config.put("keyvaluestore.epfd.allAddr", allAddr);
                     config.put("keyvaluestore.epfd.initDelay", initialDelay);
                     config.put("keyvaluestore.epfd.deltaDelay", deltaDelay);
                     return config;
