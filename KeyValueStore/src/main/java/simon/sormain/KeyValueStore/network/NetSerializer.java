@@ -9,7 +9,7 @@ import se.sics.kompics.network.Transport;
 import se.sics.kompics.network.netty.serialization.Serializer;
 import se.sics.kompics.network.netty.serialization.Serializers;
 
-public class NetSerializer implements Serializer {
+public class NetSerializer extends NeedSerialAddr implements Serializer  {
 
     private static final byte ADDR = 1;
     private static final byte HEADER = 2;
@@ -69,21 +69,5 @@ public class NetSerializer implements Serializer {
         return new THeader(src, dst, proto); // total of 13 bytes, check
     }
 
-    private void addressToBinary(TAddress addr, ByteBuf buf) {
-        buf.writeBytes(addr.getIp().getAddress()); // 4 bytes IP (let's hope it's IPv4^^)
-        buf.writeShort(addr.getPort()); // we only need 2 bytes here
-        // total of 6 bytes
-    }
 
-    private TAddress addressFromBinary(ByteBuf buf) {
-        byte[] ipBytes = new byte[4];
-        buf.readBytes(ipBytes); // 4 bytes
-        try {
-            InetAddress ip = InetAddress.getByAddress(ipBytes);
-            int port = buf.readUnsignedShort(); // 2 bytes
-            return new TAddress(ip, port); // total of 6, check
-        } catch (UnknownHostException ex) {
-            throw new RuntimeException(ex); // let Netty deal with this
-        }
-    }
 }

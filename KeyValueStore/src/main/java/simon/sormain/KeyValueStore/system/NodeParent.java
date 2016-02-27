@@ -27,13 +27,13 @@ public class NodeParent extends ComponentDefinition {
 	public NodeParent() {
 		//create and connect all components except timer and network
         Component epfd = create(Epfd.class, Init.NONE); //TODO
-        //Component beb = create(BEBroadcastComponent.class, Init.NONE); //TODO
+        Component beb = create(BEBroadcastComponent.class, Init.NONE); //TODO
         //Component rb = create(RegularReliableBroadcast.class, Init.NONE); //TODO
 
       //connect required internal components to network and timer
         connect(epfd.getNegative(Timer.class), timer, Channel.TWO_WAY);
         connect(epfd.getNegative(Network.class), network, Channel.TWO_WAY);
-        //connect(beb.getNegative(Network.class), network, Channel.TWO_WAY);
+        connect(beb.getNegative(Network.class), network, Channel.TWO_WAY);
         //connect(rb.getNegative(BEBroadcastPort.class), beb.getPositive(BEBroadcastPort.class), Channel.TWO_WAY);
         
 	}
