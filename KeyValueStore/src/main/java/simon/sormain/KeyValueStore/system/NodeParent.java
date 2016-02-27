@@ -8,11 +8,14 @@ import se.sics.kompics.Positive;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.timer.Timer;
 import simon.sormain.KeyValueStore.epfd.Epfd;
+import simon.sormain.KeyValueStore.epfd.EventuallyPerfectFailureDetectorPort;
 import simon.sormain.KeyValueStore.network.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastComponent;
 import simon.sormain.KeyValueStore.asc.MultiPaxos;
 import simon.sormain.KeyValueStore.asc.MultiPaxosInit;
+import simon.sormain.KeyValueStore.eld.Omega;
+import simon.sormain.KeyValueStore.eld.OmegaInit;
 
 
 
@@ -29,6 +32,7 @@ public class NodeParent extends ComponentDefinition {
         Component epfd = create(Epfd.class, Init.NONE); 
         Component beb = create(BEBroadcastComponent.class, Init.NONE);
         Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, 0, alladdr.get())); //TODO rank
+        Component eld = create(Omega.class, new OmegaInit(null)); //TODO ranks
 
 
       //connect required internal components to network and timer
@@ -36,7 +40,8 @@ public class NodeParent extends ComponentDefinition {
         connect(epfd.getNegative(Network.class), network, Channel.TWO_WAY);
         connect(beb.getNegative(Network.class), network, Channel.TWO_WAY);
         connect(asc.getNegative(Network.class), network, Channel.TWO_WAY);
-        //connect(rb.getNegative(BEBroadcastPort.class), beb.getPositive(BEBroadcastPort.class), Channel.TWO_WAY);
+        connect(eld.getNegative(EventuallyPerfectFailureDetectorPort.class), 
+        		epfd.getPositive(EventuallyPerfectFailureDetectorPort.class), Channel.TWO_WAY);
         
 	}
 }
