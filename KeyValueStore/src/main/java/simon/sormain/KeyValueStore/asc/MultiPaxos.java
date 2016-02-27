@@ -2,6 +2,8 @@ package simon.sormain.KeyValueStore.asc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,12 @@ public class MultiPaxos extends ComponentDefinition {
 		logger.info("Constructing MultiPaxos component.");
 		subscribe(handleStart, control);
 		subscribe(handlePropose, asc);
+		subscribe(handleNack,net);
+		subscribe(handlePrepare,net);
+		subscribe(handlePrepareAck, net);
+		subscribe(handleAccept,net);
+		subscribe(handleAcceptAck,net);
+		subscribe(handleDecide, net);
 		
 		self = event.getSelfAddress();
 		allAddresses = event.getAllAddresses();
@@ -84,14 +92,15 @@ public class MultiPaxos extends ComponentDefinition {
 				pv.add(event.getValue());
 				for(TAddress p : readList.keySet()){
 					/// TODO maybe an issue here. The value could be modified if it is not a immutable object
-					/// but having 0 information on what the value is, we cannot copy it. So ... ?
-					trigger(new TMessage(self, p, Transport.TCP, new AcceptMessage(pts, event.getValue(), pv.size()-1, t) ), net);
+					/// but having 0 information on what the value type is, we cannot copy it. So ... ?
+					ArrayList<Object> v = new ArrayList<Object>(); v.add(event.getValue());
+					trigger(new TMessage(self, p, Transport.TCP, new AcceptMessage(pts, v, pv.size()-1, t) ), net);
 				}
 			}
 		}
 	};
 	
-	ClassMatchedHandler<PrepareMessage, TMessage> prepareHandler = new ClassMatchedHandler<PrepareMessage, TMessage>() {
+	private ClassMatchedHandler<PrepareMessage, TMessage> handlePrepare = new ClassMatchedHandler<PrepareMessage, TMessage>() {
 		@Override
 		public void handle(PrepareMessage content, TMessage context) {
 			t = Math.max(t, content.getLogicalClock()) +1;
@@ -105,7 +114,7 @@ public class MultiPaxos extends ComponentDefinition {
 		}
 	};
 	
-	ClassMatchedHandler<NackMessage, TMessage> nackHandler = new ClassMatchedHandler<NackMessage, TMessage>() {
+	private ClassMatchedHandler<NackMessage, TMessage> handleNack = new ClassMatchedHandler<NackMessage, TMessage>() {
 		@Override
 		public void handle(NackMessage content, TMessage context) {
 			t = Math.max(t, content.getLogicalClock()) +1;
@@ -115,6 +124,112 @@ public class MultiPaxos extends ComponentDefinition {
 			}
 		}
 	};
+	
+	private ClassMatchedHandler<PrepareAckMessage, TMessage> handlePrepareAck = new ClassMatchedHandler<PrepareAckMessage, TMessage>() {
+		@Override
+		public void handle(PrepareAckMessage content, TMessage context) {
+			t = Math.max(t, content.getLogicalClock()) +1;
+			if(content.getTimestamp() == pts){
+				readList.put(context.getSource(),new ProposedPair(content.getAcceptorTimestamp(),content.getSuffix()));
+				decided.put(context.getSource(), content.getDecidedLength());
+				if(readList.size() == Math.floor(N/2.0)+1){
+					ProposedPair maximum = max(readList);
+					pv.addAll(maximum.getAcceptedValue());
+					
+					for(Object value : proposedValues){
+						if(!(pv.contains(value))) pv.add(value);
+					}
+					int tempL;
+					for(TAddress p : readList.keySet()){
+						tempL = decided.get(p);
+						trigger(new TMessage(self, p, Transport.TCP, new AcceptMessage(pts,suffix(pv,tempL),tempL,t) ), net);
+					}
+				}else if(readList.size() > Math.floor(N/2.0)+1){
+					int tempL = content.getDecidedLength();
+					trigger(new TMessage(self, context.getSource(), Transport.TCP, new AcceptMessage(pts,suffix(pv,tempL),tempL,t) ), net);
+					if(pl != 0){
+						trigger(new TMessage(self, context.getSource(), Transport.TCP, new DecideMessage(pts, pl, t)), net);
+					}
+				}
+			}
+			
+		}
+	};
+	
+	private ClassMatchedHandler<AcceptMessage, TMessage> handleAccept = new ClassMatchedHandler<AcceptMessage, TMessage>() {
+		@Override
+		public void handle(AcceptMessage content, TMessage context) {
+			t = Math.max(t, content.getLogicalClock()) +1;
+			if(content.getTimestamp() != prepts) { // TODO Weird ... shouldn't we allow higher proposer timestamp ?
+				trigger(new TMessage(self, context.getSource(), Transport.TCP, new NackMessage(content.getTimestamp(), t)), net);
+			}else{
+				ats = content.getTimestamp();
+				if(content.getLength() < av.size()) av = prefix(av,content.getLength());
+				av.addAll(content.getValue());
+				trigger(new TMessage(self, context.getSource(), Transport.TCP, 
+						new AcceptAckMessage(content.getTimestamp(), av.size(), t)), net);
+			}
+		}
+	};
+	
+	private ClassMatchedHandler<AcceptAckMessage, TMessage> handleAcceptAck = new ClassMatchedHandler<AcceptAckMessage, TMessage>() {
+		@Override
+		public void handle(AcceptAckMessage content, TMessage context) {
+			t = Math.max(t, content.getLogicalClock()) +1;
+			if(pts == content.getTimestamp()){
+				accepted.put(context.getSource(), content.getDecidedLength());
+				if (pl < content.getDecidedLength() 
+						&& ( countAboveL(accepted, content.getDecidedLength()) > Math.floor(N/2.0) )){
+					pl = content.getDecidedLength();
+					for(TAddress p : readList.keySet()){
+						
+						trigger(new TMessage(self, p, Transport.TCP,new DecideMessage(pts, pl, t) ), net);
+					}
+				}
+			}
+		}
+	};
+	
+	private ClassMatchedHandler<DecideMessage, TMessage> handleDecide = new ClassMatchedHandler<DecideMessage, TMessage>() {
+		@Override
+		public void handle(DecideMessage content, TMessage context) {
+			t = Math.max(t, content.getLogicalClock()) +1;
+			if(prepts == content.getTimestamp()){
+				while(al < content.getDecidedLength()){
+					trigger(new AscDecide(av.get(al) ), asc);
+					al++;
+				}
+			}
+			
+		}
+	};
+	
+	private int countAboveL(HashMap<TAddress, Integer> accepted, int length){
+		int count = 0;
+		for(int l : accepted.values()){
+			if(l >= length) count++;
+		}
+		return count;
+	}
+	/**
+	 * 
+	 * @param readList
+	 * @return the maximum pair of the readlist (highest timestamp and length)
+	 */
+	private ProposedPair max(HashMap<TAddress, ProposedPair> readList) {	
+		int tempTF = 0;
+		ArrayList<Object> tempVSUF = new ArrayList<Object>();
+		for (ProposedPair pair : readList.values())
+		{
+		    if(tempTF<pair.getAcceptedValueRound()
+		    		|| (tempTF==pair.getAcceptedValueRound() && tempVSUF.size()<pair.getAcceptedValue().size())){
+		    	tempTF = pair.getAcceptedValueRound();
+		    	tempVSUF.clear();
+		    	tempVSUF.addAll(pair.getAcceptedValue());
+		    }
+		}
+		return new ProposedPair(tempTF, tempVSUF);
+	}
 	/**
 	 *
 	 * @param sigma a sequence
@@ -123,7 +238,7 @@ public class MultiPaxos extends ComponentDefinition {
 	 */
 	private ArrayList<Object>  prefix(ArrayList<Object> sigma,int k){
 		ArrayList<Object> result = new ArrayList<Object>();
-		sigma.subList(0, k).addAll(result);
+		result.addAll(sigma.subList(0, k));
 		return result;
 	}
 	
@@ -135,7 +250,7 @@ public class MultiPaxos extends ComponentDefinition {
 	 */
 	private ArrayList<Object>  suffix(ArrayList<Object> sigma,int k){
 		ArrayList<Object> result = new ArrayList<Object>();
-		sigma.subList(k, sigma.size()).addAll(result);
+		result.addAll(sigma.subList(k, sigma.size()));
 		return result;
 	}
 }
