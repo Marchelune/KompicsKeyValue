@@ -6,17 +6,11 @@ import se.sics.kompics.ComponentDefinition;
 import se.sics.kompics.Init;
 import se.sics.kompics.Positive;
 import se.sics.kompics.network.Network;
-import se.sics.kompics.network.netty.NettyInit;
-import se.sics.kompics.network.netty.NettyNetwork;
 import se.sics.kompics.timer.Timer;
-import se.sics.kompics.timer.java.JavaTimer;
 import simon.sormain.KeyValueStore.epfd.Epfd;
 import simon.sormain.KeyValueStore.network.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastComponent;
-import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastPort;
-import simon.sormain.KeyValueStore.rBroadcast.RegularReliableBroadcast;
-import simon.sormain.KeyValueStore.asc.AbortableSequenceConsensusPort;
 import simon.sormain.KeyValueStore.asc.MultiPaxos;
 import simon.sormain.KeyValueStore.asc.MultiPaxosInit;
 

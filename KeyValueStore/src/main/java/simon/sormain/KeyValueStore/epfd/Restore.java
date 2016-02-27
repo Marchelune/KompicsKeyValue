@@ -19,20 +19,19 @@
  */
 package simon.sormain.KeyValueStore.epfd;
 
-import se.sics.kompics.Event;
-
+import se.sics.kompics.KompicsEvent;
 import simon.sormain.KeyValueStore.network.TAddress;
 
-@SuppressWarnings("deprecation")
-public class Restore extends Event {
 
-	private final TAddress source;
+public class Restore implements KompicsEvent {
 
-	public Restore(TAddress source) {
-		this.source = source;
+	private final TAddress restored;
+
+	public Restore(TAddress restored) {
+		this.restored = restored;
 	}
 
-	public final TAddress getSource() {
-		return source;
+	public final TAddress getRestored() {
+		return restored;
 	}
 }
