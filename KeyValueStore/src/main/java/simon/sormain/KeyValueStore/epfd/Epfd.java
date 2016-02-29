@@ -108,10 +108,10 @@ public class Epfd extends ComponentDefinition {
 				trigger(new TMessage(selfAddress, p, Transport.TCP, new HeartbeatRequestMessage(seqnum)), net);
 			}
 			
-			logger.info("{} hello suspected: {}.", new Object[]{selfAddress, suspected});
+			//logger.info("{} hello suspected: {}.", new Object[]{selfAddress, suspected});
 			//alive = new HashSet<TAddress>();
 			alive.clear();
-			logger.info("{} ALIVE EMPTY", new Object[]{selfAddress, alive});
+			//logger.info("{} ALIVE EMPTY", new Object[]{selfAddress, alive});
 			ScheduleTimeout st = new ScheduleTimeout(delay);
 			st.setTimeoutEvent(new CheckTimeout(st));
 			trigger(st, timer);
@@ -127,7 +127,7 @@ public class Epfd extends ComponentDefinition {
 	
 	ClassMatchedHandler<HeartbeatReplyMessage, TMessage> handleHeartbeatReplyMessage = new ClassMatchedHandler<HeartbeatReplyMessage, TMessage>() {
 		public void handle(HeartbeatReplyMessage content, TMessage context) {
-			logger.info("{} got heartbeat from {}.", new Object[]{selfAddress, context.getSource()});
+			//logger.info("{} got heartbeat from {}.", new Object[]{selfAddress, context.getSource()});
 			TAddress p = context.getSource();
 			if(suspected.contains(p) || seqnum == content.getSeqnum()) {
 				//logger.info("{}:  {} is alive.", new Object[]{selfAddress, context.getSource()});
