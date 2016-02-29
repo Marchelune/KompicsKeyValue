@@ -38,5 +38,20 @@ public class OperationACK implements Serializable, KompicsEvent {
 		return result;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+ 		boolean retValue = false;
+    	if (obj instanceof OperationACK) {
+			OperationACK e  = (OperationACK)obj;
+			retValue =  op.equals(e.getOp());
+		}
+		return retValue;
+	}
+	
+	@Override
+    public int hashCode() {
+        return 1+op.hashCode();
+    }
+	
 
 }
