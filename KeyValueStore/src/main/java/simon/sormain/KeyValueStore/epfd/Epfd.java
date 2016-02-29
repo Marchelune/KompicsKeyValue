@@ -36,33 +36,25 @@ public class Epfd extends ComponentDefinition {
 	private long delay;
 
 	private final TAddress selfAddress;
-	private final Set<TAddress> allAddresses;
+	private Set<TAddress> allAddresses;
 	private final long initialDelay;
-	private final long deltaDelay;
+	private long deltaDelay;
 	
-	public Epfd() {
+	public Epfd(EpfdInit init) {
 		subscribe(handleStart, control);
 		subscribe(handleCheckTimeout, timer);
 		subscribe(handleHeartbeatReplyMessage, net);
 		subscribe(handleHeartbeatRequestMessage, net);
 		
-        this.selfAddress = config().getValue("keyvaluestore.self", TAddress.class);
-        //TAddress addr1 = config().getValue("keyvaluestore.epfd.allAddr.addr1", TAddress.class);
-        //TAddress addr2 = config().getValue("keyvaluestore.epfd.allAddr.addr2", TAddress.class);
-        //TAddress addr3 = config().getValue("keyvaluestore.epfd.allAddr.addr3", TAddress.class);
-        //TAddress addr4 = config().getValue("keyvaluestore.epfd.allAddr.addr4", TAddress.class);
-        //TAddress addr5 = config().getValue("keyvaluestore.epfd.allAddr.addr5", TAddress.class);
-        //ListTAddress Addrs = new HashSet<TAddress>();
-        //Addrs.add(addr1);
-        //Addrs.add(addr2);
-        //Addrs.add(addr3);
-        //Addrs.add(addr4);
-        //Addrs.add(addr5);
-        //this.allAddresses = Addrs;
-        SetTAddress alladdr = config().getValue("keyvaluestore.epfd.allAddr", SetTAddress.class);
-        this.allAddresses = alladdr.get();
-        this.initialDelay = config().getValue("keyvaluestore.epfd.initDelay", Long.class);
-        this.deltaDelay = config().getValue("keyvaluestore.epfd.deltaDelay", Long.class);
+//        this.selfAddress = config().getValue("keyvaluestore.self", TAddress.class);
+//        SetTAddress alladdr = config().getValue("keyvaluestore.epfd.allAddr", SetTAddress.class);
+//        this.allAddresses = alladdr.get();
+//        this.initialDelay = config().getValue("keyvaluestore.epfd.initDelay", Long.class);
+//        this.deltaDelay = config().getValue("keyvaluestore.epfd.deltaDelay", Long.class);
+		selfAddress = init.getSelfAddress();
+		allAddresses = init.getAllAddresses();
+		initialDelay = init.getInitialDelay();
+		deltaDelay = init.getDeltaDelay();
 	}
 	
 	private Handler<Start> handleStart = new Handler<Start>() {

@@ -82,8 +82,8 @@ public class RegularReliableBroadcast extends ComponentDefinition {
 	private Handler<Suspect> handleSuspect = new Handler<Suspect>() {
 		@Override
 		public void handle(Suspect event) {
-			suspected.add(event.getSource());
-			BroadcastedMessage last = lastDelivered.get(event.getSource());
+			suspected.add(event.getSuspected());
+			BroadcastedMessage last = lastDelivered.get(event.getSuspected());
 			if(last != null){
 				trigger(new BEBroadcast(last.getSrc(), last.getDst(), last), beb);
 				//we trust our FIFO channel here, we just rebroadcast the last message seen from the supposed crashed
@@ -95,7 +95,7 @@ public class RegularReliableBroadcast extends ComponentDefinition {
 	private Handler<Restore> handleRestore = new Handler<Restore>() {
 		@Override
 		public void handle(Restore event) {
-			suspected.remove(event.getSource());
+			suspected.remove(event.getRestored());
 		}
 	};
 	
