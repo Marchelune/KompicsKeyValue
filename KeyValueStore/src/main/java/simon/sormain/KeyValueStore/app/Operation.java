@@ -57,6 +57,11 @@ public abstract class Operation implements KompicsEvent, Serializable, Comparabl
 		}
 		return false;
 	}
+	
+	@Override
+    public int hashCode() {
+        return uniqueSequenceNumber*key + client.hashCode();
+    }
 
 	@Override
 	public abstract String toString();
