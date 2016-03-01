@@ -14,6 +14,7 @@ import simon.sormain.KeyValueStore.network.THeader;
 import simon.sormain.KeyValueStore.network.TMessage;
 import simon.sormain.KeyValueStore.system.NodeParent;
 import simon.sormain.KeyValueStore.system.NodeHost;
+import simon.sormain.KeyValueStore.app.RangeConverter;
 
 public class Main {
     static {
@@ -29,6 +30,7 @@ public class Main {
         // conversions
         Conversions.register(new TAddressConverter());
         Conversions.register(new SetTAddressConverter());
+        Conversions.register(new RangeConverter());
     }
     
     
