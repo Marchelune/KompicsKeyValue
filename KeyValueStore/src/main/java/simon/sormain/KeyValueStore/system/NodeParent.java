@@ -1,6 +1,9 @@
 package simon.sormain.KeyValueStore.system;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeMap;
 
 import se.sics.kompics.Channel;
 import se.sics.kompics.Component;
@@ -12,7 +15,6 @@ import se.sics.kompics.timer.Timer;
 import simon.sormain.KeyValueStore.epfd.Epfd;
 import simon.sormain.KeyValueStore.epfd.EpfdInit;
 import simon.sormain.KeyValueStore.epfd.EventuallyPerfectFailureDetectorPort;
-import simon.sormain.KeyValueStore.network.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastComponent;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastPort;
@@ -27,6 +29,9 @@ import simon.sormain.KeyValueStore.app.StoreInit;
 import simon.sormain.KeyValueStore.asc.AbortableSequenceConsensusPort;
 import simon.sormain.KeyValueStore.asc.MultiPaxos;
 import simon.sormain.KeyValueStore.asc.MultiPaxosInit;
+import simon.sormain.KeyValueStore.converters.MapRanges;
+import simon.sormain.KeyValueStore.converters.MapRanks;
+import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.eld.EventualLeaderDetectorPort;
 import simon.sormain.KeyValueStore.eld.Omega;
 import simon.sormain.KeyValueStore.eld.OmegaInit;
@@ -39,17 +44,28 @@ public class NodeParent extends ComponentDefinition {
     Positive<Timer> timer = requires(Timer.class);
     
 	public NodeParent() {
-		TAddress selfAddress = config().getValue("keyvaluestore.self", TAddress.class);
-		HashSet<TAddress> alladdr = config().getValue("keyvaluestore.epfd.allAddr", SetTAddress.class).get();//still think this is weird :p
+		TAddress selfAddress = config().getValue("keyvaluestore.self.addr", TAddress.class);
+		int selfRank = config().getValue("keyvaluestore.self.rank", Integer.class);
+		MapRanks mRanks = config().getValue("keyvaluestore.self.ranks", MapRanks.class);
+		TreeMap<Integer, TAddress> Ranks = mRanks.getMap();
+		MapRanges mRanges = config().getValue("keyvaluestore.self.ranges", MapRanges.class);
+		HashMap<int[], Set<TAddress>> Ranges = mRanges.getMap();
+		
+		//HashSet<TAddress> alladdr = config().getValue("keyvaluestore.epfd.allAddr", SetTAddress.class).get();//still think this is weird :p
 		long initialDelay = config().getValue("keyvaluestore.epfd.initDelay", Long.class);
 		long deltaDelay = config().getValue("keyvaluestore.epfd.deltaDelay", Long.class);
+		
+		// Get all addrs using Ranks
+		HashSet<TAddress> alladdr = new HashSet<TAddress>(Ranks.values());
+		
+		
 		
 		//create and connect all components except timer and network
         Component epfd = create(Epfd.class, new EpfdInit(selfAddress, alladdr, initialDelay, deltaDelay)); 
         Component beb = create(BEBroadcastComponent.class, Init.NONE);
         Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, 0, alladdr)); //TODO rank
-        Component eld = create(Omega.class, new OmegaInit(null)); //TODO ranks
-        Component routy = create(Router.class, new RouterInit(null, selfAddress)); //TODO Ranges
+        Component eld = create(Omega.class, new OmegaInit(Ranks)); 
+        Component routy = create(Router.class, new RouterInit(Ranges, selfAddress));
         Component tob = create(Tob.class, new TobInit(selfAddress, alladdr));
         Component app = create(Store.class, new StoreInit(selfAddress));
 

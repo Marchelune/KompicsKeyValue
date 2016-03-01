@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.network;
+package simon.sormain.KeyValueStore.converters;
 
 import java.util.*;
 import simon.sormain.KeyValueStore.network.*;

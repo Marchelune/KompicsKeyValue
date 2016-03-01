@@ -13,7 +13,7 @@ import se.sics.kompics.timer.CancelPeriodicTimeout;
 import se.sics.kompics.timer.SchedulePeriodicTimeout;
 import se.sics.kompics.timer.Timeout;
 import se.sics.kompics.timer.Timer;
-import simon.sormain.KeyValueStore.network.SetTAddress;
+import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcast;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastPort;

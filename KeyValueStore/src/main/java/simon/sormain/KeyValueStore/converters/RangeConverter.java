@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.app;
+package simon.sormain.KeyValueStore.converters;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import se.sics.kompics.config.Converter;
-import simon.sormain.KeyValueStore.network.SetTAddress;
-import simon.sormain.KeyValueStore.network.SetTAddressConverter;
 import simon.sormain.KeyValueStore.network.TAddress;
 
 

@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.network;
+package simon.sormain.KeyValueStore.converters;
 
 
 import java.net.InetAddress;

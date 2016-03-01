@@ -20,6 +20,7 @@ import se.sics.kompics.simulator.events.system.KillNodeEvent;
 import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.util.GlobalView;
+import simon.sormain.KeyValueStore.converters.SetTAddress;
 //import se.sics.test.sim.SimulationObserver;
 import simon.sormain.KeyValueStore.network.*;
 import simon.sormain.KeyValueStore.system.*;

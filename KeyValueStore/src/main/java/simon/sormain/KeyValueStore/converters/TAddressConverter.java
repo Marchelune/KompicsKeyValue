@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.network;
+package simon.sormain.KeyValueStore.converters;
 
 
 import java.net.InetAddress;
@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import se.sics.kompics.config.Conversions;
 import se.sics.kompics.config.Converter;
+import simon.sormain.KeyValueStore.network.TAddress;
 
 public class TAddressConverter implements Converter<TAddress> {
 
