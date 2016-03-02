@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.sim;
+package simon.sormain.KeyValueStore.sim.eld;
 
 import java.util.UUID;
 
@@ -16,15 +16,13 @@ import se.sics.kompics.timer.SchedulePeriodicTimeout;
 import se.sics.kompics.timer.Timeout;
 import se.sics.kompics.timer.Timer;
 import simon.sormain.KeyValueStore.network.TAddress;
-import simon.sormain.KeyValueStore.sim.SimulationObserverBEB.CheckTimeout;
 
 public class SimulationObserverELD extends ComponentDefinition {
 
-private static final Logger LOG = LoggerFactory.getLogger(SimulationObserverBEB.class);
+private static final Logger LOG = LoggerFactory.getLogger(SimulationObserverELD.class);
     
     Positive<Timer> timer = requires(Timer.class);
     Positive<Network> network = requires(Network.class);
-    
     private UUID timerId;
 
     public SimulationObserverELD() {

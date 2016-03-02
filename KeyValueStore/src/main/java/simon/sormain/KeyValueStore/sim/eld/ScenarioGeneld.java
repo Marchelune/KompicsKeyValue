@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.sim;
+package simon.sormain.KeyValueStore.sim.eld;
 
 import static java.lang.Math.toIntExact;
 
@@ -19,7 +19,6 @@ import se.sics.kompics.simulator.util.GlobalView;
 import simon.sormain.KeyValueStore.converters.MapRanks;
 import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
-import simon.sormain.KeyValueStore.system.NodeParenteld;
 
 public class ScenarioGeneld {
 

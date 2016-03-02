@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.sim;
+package simon.sormain.KeyValueStore.sim.beb;
 
 import java.util.HashSet;
 import java.util.UUID;
@@ -43,7 +43,7 @@ public class BEBSimuSender extends ComponentDefinition {
         connect(epfd.getNegative(Timer.class), timer, Channel.TWO_WAY);
         connect(epfd.getNegative(Network.class), network, Channel.TWO_WAY);
         connect(beb.getNegative(Network.class), network, Channel.TWO_WAY);
-        connect(sender.getNegative(BEBroadcastPort.class), beb.getPositive(BEBroadcastPort.class), Channel.TWO_WAY); // ????
+        connect(sender.getNegative(BEBroadcastPort.class), beb.getPositive(BEBroadcastPort.class), Channel.TWO_WAY); 
         connect(sender.getNegative(Timer.class), timer, Channel.TWO_WAY);
     }
     

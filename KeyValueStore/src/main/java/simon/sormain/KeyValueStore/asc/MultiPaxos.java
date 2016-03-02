@@ -14,8 +14,11 @@ import se.sics.kompics.Positive;
 import se.sics.kompics.Start;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
+import se.sics.kompics.simulator.util.GlobalView;
+import simon.sormain.KeyValueStore.app.Operation;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.network.TMessage;
+import simon.sormain.KeyValueStore.sim.multipaxos.OpSequence;
 import se.sics.kompics.ClassMatchedHandler;
 
 
@@ -197,6 +200,7 @@ public class MultiPaxos extends ComponentDefinition {
 			if(prepts == content.getTimestamp()){
 				while(al < content.getDecidedLength()){
 					trigger(new AscDecide(av.get(al) ), asc);
+					DecidedOp(av.get(al));	//Simu
 					al++;
 				}
 			}
@@ -252,5 +256,43 @@ public class MultiPaxos extends ComponentDefinition {
 		ArrayList<Object> result = new ArrayList<Object>();
 		result.addAll(sigma.subList(k, sigma.size()));
 		return result;
+	}
+	
+	
+	//Simu
+	private void DecidedOp(Operation op) {
+        GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+        TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
+        OpSequence DecidedSeq;
+        switch (selfaddr.getPort()) {
+        case 10000 :
+        	DecidedSeq = gv.getValue("simulation.seqdecided1", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdecided1", DecidedSeq);
+        	break;
+        case 20000 :
+        	DecidedSeq = gv.getValue("simulation.seqdecided2", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdecided2", DecidedSeq);
+        	break;
+        case 30000 :
+        	DecidedSeq = gv.getValue("simulation.seqdecided3", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdecided3", DecidedSeq);
+        	break;
+        case 40000 :
+        	DecidedSeq = gv.getValue("simulation.seqdecided4", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdecided4", DecidedSeq);
+        	break;
+        case 50000 :
+        	DecidedSeq = gv.getValue("simulation.seqdecided5", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdecided5", DecidedSeq);
+        	break;
+    		
+        }
+        
+        
 	}
 }
