@@ -2,6 +2,7 @@ package simon.sormain.KeyValueStore.system;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -47,24 +48,30 @@ public class NodeParent extends ComponentDefinition {
 		TAddress selfAddress = config().getValue("keyvaluestore.self.addr", TAddress.class);
 		int selfRank = config().getValue("keyvaluestore.self.rank", Integer.class);
 		MapRanks mRanks = config().getValue("keyvaluestore.self.ranks", MapRanks.class);
-		TreeMap<Integer, TAddress> Ranks = mRanks.getMap();
+		TreeMap<Integer, TAddress> ranks = mRanks.getMap();
 		MapRanges mRanges = config().getValue("keyvaluestore.self.ranges", MapRanges.class);
 		HashMap<int[], Set<TAddress>> Ranges = mRanges.getMap();
+		int rank = 0;
+		for(Entry<Integer,TAddress> e : ranks.entrySet()){
+			if(e.getValue().equals(selfAddress)){
+				rank=e.getKey();
+				break;
+			}
+		}
 		
-		//HashSet<TAddress> alladdr = config().getValue("keyvaluestore.epfd.allAddr", SetTAddress.class).get();//still think this is weird :p
 		long initialDelay = config().getValue("keyvaluestore.epfd.initDelay", Long.class);
 		long deltaDelay = config().getValue("keyvaluestore.epfd.deltaDelay", Long.class);
 		
 		// Get all addrs using Ranks
-		HashSet<TAddress> alladdr = new HashSet<TAddress>(Ranks.values());
+		HashSet<TAddress> alladdr = new HashSet<TAddress>(ranks.values());
 		
 		
 		
 		//create and connect all components except timer and network
         Component epfd = create(Epfd.class, new EpfdInit(selfAddress, alladdr, initialDelay, deltaDelay)); 
         Component beb = create(BEBroadcastComponent.class, Init.NONE);
-        Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, 0, alladdr)); //TODO rank
-        Component eld = create(Omega.class, new OmegaInit(Ranks)); 
+        Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, rank, alladdr)); //TODO rank
+        Component eld = create(Omega.class, new OmegaInit(ranks)); 
         Component routy = create(Router.class, new RouterInit(Ranges, selfAddress));
         Component tob = create(Tob.class, new TobInit(selfAddress, alladdr));
         Component app = create(Store.class, new StoreInit(selfAddress));

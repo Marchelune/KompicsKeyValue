@@ -39,6 +39,7 @@ public class Client extends ComponentDefinition {
 	private HashSet<OperationACK> replies;
 
 	public Client(ClientInit init) {
+		logger.info("Building client.");
 		subscribe(handleStart, control);
 		subscribe(handleConsoleLine,console);
 		subscribe(handleOperationACK, net);
@@ -103,6 +104,7 @@ public class Client extends ComponentDefinition {
 			badCommand(event);
 		}else{
 			Operation op = new PutOperation(self, sequenceNumber, Integer.parseInt(command[1]), command[2]);
+			
 			trigger( new TMessage(self, kvStore, Transport.TCP, op),net);
 		}
 	}
