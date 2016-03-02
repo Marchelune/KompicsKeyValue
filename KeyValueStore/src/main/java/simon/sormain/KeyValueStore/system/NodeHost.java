@@ -18,7 +18,7 @@ public class NodeHost extends ComponentDefinition {
     
 	public NodeHost() {
 		
-		TAddress self = config().getValue("keyvaluestore.self", TAddress.class);
+		TAddress self = config().getValue("keyvaluestore.self.addr", TAddress.class);
 		//create and connect all components except timer and network
 		
 		Component timer = create(JavaTimer.class, Init.NONE ); 
