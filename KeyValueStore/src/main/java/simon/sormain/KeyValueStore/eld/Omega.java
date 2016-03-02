@@ -1,7 +1,6 @@
 package simon.sormain.KeyValueStore.eld;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
@@ -12,7 +11,6 @@ import se.sics.kompics.Handler;
 import se.sics.kompics.Negative;
 import se.sics.kompics.Positive;
 import se.sics.kompics.Start;
-import se.sics.kompics.simulator.util.GlobalView;
 import simon.sormain.KeyValueStore.epfd.EventuallyPerfectFailureDetectorPort;
 import simon.sormain.KeyValueStore.epfd.Restore;
 import simon.sormain.KeyValueStore.epfd.Suspect;
@@ -51,9 +49,6 @@ public class Omega extends ComponentDefinition {
 			logger.info("Omega started." );
 			currentLeader = allAddresses.firstEntry().getValue();
 			trigger(new Trust(currentLeader), eld);
-			//Simu
-			leaderChange();
-			logger.info("{} I initially trust : {}", new Object[]{config().getValue("keyvaluestore.self.addr", TAddress.class), currentLeader});
 		}
 	};
 	
@@ -81,35 +76,11 @@ public class Omega extends ComponentDefinition {
 		if(!tempLeader.equals(currentLeader)){
 			currentLeader = tempLeader;
 			trigger(new Trust(currentLeader), eld);
-			//Simu
-			leaderChange();
-			logger.info("{} I know trust : {}", new Object[]{config().getValue("keyvaluestore.self.addr", TAddress.class), currentLeader});
+			
 		}
 	}
 
-	//Simu
-	private void leaderChange() {
-        GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
-        TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
-        switch (selfaddr.getPort()) {
-        case 10000 :
-        	gv.setValue("simulation.leader1", currentLeader);
-        	break;
-        case 20000 :
-        	gv.setValue("simulation.leader2", currentLeader);
-        	break;
-        case 30000 :
-        	gv.setValue("simulation.leader3", currentLeader);
-        	break;
-        case 40000 :
-        	gv.setValue("simulation.leader4", currentLeader);
-        	break;
-        case 50000 :
-        	gv.setValue("simulation.leader5", currentLeader);
-        	break;
-    		
-        }
-	}
+	
 	
 
 }
