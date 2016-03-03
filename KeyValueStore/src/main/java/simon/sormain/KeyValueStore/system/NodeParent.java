@@ -51,13 +51,8 @@ public class NodeParent extends ComponentDefinition {
 		TreeMap<Integer, TAddress> ranks = mRanks.getMap();
 		MapRanges mRanges = config().getValue("keyvaluestore.self.ranges", MapRanges.class);
 		HashMap<int[], Set<TAddress>> Ranges = mRanges.getMap();
-		int rank = 0;
-		for(Entry<Integer,TAddress> e : ranks.entrySet()){
-			if(e.getValue().equals(selfAddress)){
-				rank=e.getKey();
-				break;
-			}
-		}
+		
+	
 		
 		long initialDelay = config().getValue("keyvaluestore.epfd.initDelay", Long.class);
 		long deltaDelay = config().getValue("keyvaluestore.epfd.deltaDelay", Long.class);
@@ -70,7 +65,7 @@ public class NodeParent extends ComponentDefinition {
 		//create and connect all components except timer and network
         Component epfd = create(Epfd.class, new EpfdInit(selfAddress, alladdr, initialDelay, deltaDelay)); 
         Component beb = create(BEBroadcastComponent.class, Init.NONE);
-        Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, rank, alladdr)); //TODO rank
+        Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, selfRank, alladdr)); //TODO rank
         Component eld = create(Omega.class, new OmegaInit(ranks)); 
         Component routy = create(Router.class, new RouterInit(Ranges, selfAddress));
         Component tob = create(Tob.class, new TobInit(selfAddress, alladdr));
