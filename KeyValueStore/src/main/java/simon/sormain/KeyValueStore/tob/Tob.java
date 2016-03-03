@@ -123,7 +123,7 @@ public class Tob extends ComponentDefinition {
 	};
 	
 	private boolean trusted() {
-		return self == leader;
+		return self.equals(leader);
 	}
 	
 
