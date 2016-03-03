@@ -59,8 +59,8 @@ public class Epfd extends ComponentDefinition {
 	
 	private Handler<Start> handleStart = new Handler<Start>() {
 		public void handle(Start event) {
-			logger.info("EPFD starting ...");
-			logger.info("{} I know : {}", new Object[]{selfAddress, allAddresses});
+			logger.info("{} EPFD starting ...", config().getValue("keyvaluestore.self.addr", TAddress.class));
+			logger.info("{} I watch : {} \n", new Object[]{selfAddress, allAddresses});
 			seqnum = 0;
 			suspected = new HashSet<TAddress>();
 			alive = new HashSet<TAddress>(allAddresses);

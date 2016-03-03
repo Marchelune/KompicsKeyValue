@@ -1,6 +1,5 @@
-package simon.sormain.KeyValueStore.sim.multipaxos;
+package simon.sormain.KeyValueStore.sim.tob;
 
-import java.util.HashSet;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -17,28 +16,26 @@ import se.sics.kompics.timer.Timer;
 import simon.sormain.KeyValueStore.app.GetOperation;
 import simon.sormain.KeyValueStore.asc.AbortableSequenceConsensusPort;
 import simon.sormain.KeyValueStore.asc.AscPropose;
-import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
-import simon.sormain.KeyValueStore.rBroadcast.BEBroadcast;
-import simon.sormain.KeyValueStore.sim.beb.BebSender.SendTimeout;
-import simon.sormain.KeyValueStore.tob.Tob;
+import simon.sormain.KeyValueStore.sim.multipaxos.SendProposeMPaxosComponent;
+import simon.sormain.KeyValueStore.sim.multipaxos.SendProposeMPaxosComponent.SendTimeout;
+import simon.sormain.KeyValueStore.tob.TobBroadcast;
+import simon.sormain.KeyValueStore.tob.TotalOrderBroadcastPort;
 
-//Simu component
-public class SendProposeMPaxosComponent extends ComponentDefinition {
-	
-	private static final Logger logger = LoggerFactory.getLogger(SendProposeMPaxosComponent.class);
-	
+public class tobSenderComponent extends ComponentDefinition {
+
+	private static final Logger logger = LoggerFactory.getLogger(tobSenderComponent.class);
 	Positive<Timer> timer = requires(Timer.class);
-	private Positive<AbortableSequenceConsensusPort> asc = requires(AbortableSequenceConsensusPort.class);
+	private Positive<TotalOrderBroadcastPort> tob = requires(TotalOrderBroadcastPort.class);
 	private UUID timerId;
 	private int seqnum;
 	TAddress selfaddr;
 	
-	public SendProposeMPaxosComponent() {
+	
+	public tobSenderComponent() {
     	subscribe(handleStart, control);
     	subscribe(handleSendTimeout, timer);
-
-    }
+	}
 	
 	Handler<Start> handleStart = new Handler<Start>() {
         @Override
@@ -49,11 +46,11 @@ public class SendProposeMPaxosComponent extends ComponentDefinition {
         }
     };
     
+    
     @Override
     public void tearDown() {
         trigger(new CancelPeriodicTimeout(timerId), timer);
     }
-    
     
     Handler<SendTimeout> handleSendTimeout = new Handler<SendTimeout>() {
         @Override
@@ -61,13 +58,13 @@ public class SendProposeMPaxosComponent extends ComponentDefinition {
         	seqnum++;
         	// The value of the key nor the type of the operation matter here
         	GetOperation op = new GetOperation(selfaddr, seqnum, 0);
-        	trigger(new AscPropose(op), asc);
-        	logger.info("MultiPaxos : {}; PROPOSING : {}: \n", selfaddr, op);
+        	trigger(new TobBroadcast(op), tob);
+        	logger.info("tob : {}; SENDING : {}: \n", selfaddr, op);
         }
     };
     
     private void schedulePeriodicCheck() {
-        long period = config().getValue("simulation.ratePropose", Long.class);
+        long period = config().getValue("simulation.ratebc", Long.class);
         SchedulePeriodicTimeout spt = new SchedulePeriodicTimeout(period, period);
         SendTimeout timeout = new SendTimeout(spt);
         spt.setTimeoutEvent(timeout);
@@ -81,5 +78,4 @@ public class SendProposeMPaxosComponent extends ComponentDefinition {
             super(spt);
         }
     }
-
 }

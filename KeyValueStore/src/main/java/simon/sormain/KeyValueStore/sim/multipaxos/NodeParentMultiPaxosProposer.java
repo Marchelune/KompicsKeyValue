@@ -31,7 +31,7 @@ public class NodeParentMultiPaxosProposer extends ComponentDefinition{
 		HashSet<TAddress> alladdr = new HashSet<TAddress>(Ranks.values());
 		
 		//create and connect all components except timer and network
-		Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, 0, alladdr)); //TODO rank
+		Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, selfRank, alladdr)); //TODO rank
 		Component proposer = create(SendProposeMPaxosComponent.class, Init.NONE);
 		
 		//connect required internal components to network and timer

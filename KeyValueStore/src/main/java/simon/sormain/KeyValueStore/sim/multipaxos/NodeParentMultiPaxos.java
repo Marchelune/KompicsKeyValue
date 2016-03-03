@@ -29,7 +29,7 @@ public class NodeParentMultiPaxos extends ComponentDefinition{
 		HashSet<TAddress> alladdr = new HashSet<TAddress>(Ranks.values());
 		
 		//create and connect all components except timer and network
-		Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, 0, alladdr)); //TODO rank
+		Component asc = create(MultiPaxos.class, new MultiPaxosInit(selfAddress, selfRank, alladdr)); //TODO rank
 		
 		//connect required internal components to network and timer
 		connect(asc.getNegative(Network.class), network, Channel.TWO_WAY);

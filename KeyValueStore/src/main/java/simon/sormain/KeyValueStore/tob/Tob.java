@@ -13,6 +13,7 @@ import se.sics.kompics.Positive;
 import se.sics.kompics.Start;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
+import se.sics.kompics.simulator.util.GlobalView;
 import simon.sormain.KeyValueStore.app.Operation;
 import simon.sormain.KeyValueStore.asc.AbortableSequenceConsensusPort;
 import simon.sormain.KeyValueStore.asc.AscAbort;
@@ -23,6 +24,7 @@ import simon.sormain.KeyValueStore.eld.Trust;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.network.TMessage;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastPort;
+import simon.sormain.KeyValueStore.sim.multipaxos.OpSequence;
 
 public class Tob extends ComponentDefinition {
 	
@@ -53,6 +55,7 @@ public class Tob extends ComponentDefinition {
 	private Handler<Start> handleStart = new Handler<Start>() {
 		@Override
 		public void handle(Start event) {
+			logger.info("{} TOB started.", config().getValue("keyvaluestore.self.addr", TAddress.class));
 			undecided = new HashSet<Operation>();
 			decided = new HashSet<Operation>();
 		}
@@ -61,6 +64,7 @@ public class Tob extends ComponentDefinition {
 	private Handler<TobBroadcast> handleTobBroadcast = new Handler<TobBroadcast>() {
 		@Override
 		public void handle(TobBroadcast event) {
+			
 			undecided.add(event.getOp());
 			if(trusted()){
 				trigger(new AscPropose(event.getOp()), asc);
@@ -118,15 +122,49 @@ public class Tob extends ComponentDefinition {
 			undecided.remove((Operation) event.getValue());
 			decided.add((Operation)event.getValue());
 			trigger( new TobDeliver((Operation) event.getValue() ) , tob);
+			DeliveredOp((Operation) event.getValue()); // Simu
 			
 		}
 	};
 	
 	private boolean trusted() {
-		return self == leader;
+		return self.equals(leader);
 	}
 	
-
+	//Simu
+	private void DeliveredOp(Operation op) {
+        GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+        TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
+        OpSequence DecidedSeq;
+        switch (selfaddr.getPort()) {
+        case 10000 :
+        	DecidedSeq = gv.getValue("simulation.seqdelivered1", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdelivered1", DecidedSeq);
+        	break;
+        case 20000 :
+        	DecidedSeq = gv.getValue("simulation.seqdelivered2", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdelivered2", DecidedSeq);
+        	break;
+        case 30000 :
+        	DecidedSeq = gv.getValue("simulation.seqdelivered3", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdelivered3", DecidedSeq);
+        	break;
+        case 40000 :
+        	DecidedSeq = gv.getValue("simulation.seqdelivered4", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdelivered4", DecidedSeq);
+        	break;
+        case 50000 :
+        	DecidedSeq = gv.getValue("simulation.seqdelivered5", OpSequence.class);
+        	DecidedSeq.add(op);
+        	gv.setValue("simulation.seqdelivered5", DecidedSeq);
+        	break;
+    		
+        }
+	}
 
 
 }

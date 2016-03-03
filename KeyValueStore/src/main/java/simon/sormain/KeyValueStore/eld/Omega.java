@@ -48,12 +48,12 @@ public class Omega extends ComponentDefinition {
 	private Handler<Start> handleStart = new Handler<Start>() {
 		@Override
 		public void handle(Start event) {
-			logger.info("Omega started." );
+			logger.info("{} Omega started.", config().getValue("keyvaluestore.self.addr", TAddress.class));
 			currentLeader = allAddresses.firstEntry().getValue();
 			trigger(new Trust(currentLeader), eld);
 			//Simu
 			leaderChange();
-			logger.info("{} I initially trust : {}", new Object[]{config().getValue("keyvaluestore.self.addr", TAddress.class), currentLeader});
+			logger.info("{} I initially trust : {} \n", new Object[]{config().getValue("keyvaluestore.self.addr", TAddress.class), currentLeader});
 		}
 	};
 	
@@ -83,7 +83,7 @@ public class Omega extends ComponentDefinition {
 			trigger(new Trust(currentLeader), eld);
 			//Simu
 			leaderChange();
-			logger.info("{} I know trust : {}", new Object[]{config().getValue("keyvaluestore.self.addr", TAddress.class), currentLeader});
+			logger.info("{} I know trust : {} \n", new Object[]{config().getValue("keyvaluestore.self.addr", TAddress.class), currentLeader});
 		}
 	}
 

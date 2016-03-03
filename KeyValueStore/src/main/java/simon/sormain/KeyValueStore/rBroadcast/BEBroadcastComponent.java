@@ -34,7 +34,7 @@ public class BEBroadcastComponent extends ComponentDefinition {
 	private Handler<Start> handleStart = new Handler<Start>() {
 		@Override
 		public void handle(Start event) {
-			logger.info("BestEffortBroadcast starting ...");
+			logger.info("{} BestEffortBroadcast starting ...", config().getValue("keyvaluestore.self.addr", TAddress.class));
 		}
 	};
 	

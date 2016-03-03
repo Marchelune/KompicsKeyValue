@@ -1,10 +1,9 @@
-package simon.sormain.KeyValueStore.sim.multipaxos;
+package simon.sormain.KeyValueStore.sim.tob;
 
 import static java.lang.Math.toIntExact;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,16 +20,23 @@ import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.util.GlobalView;
 import simon.sormain.KeyValueStore.converters.MapRanks;
 import simon.sormain.KeyValueStore.network.TAddress;
-import simon.sormain.KeyValueStore.sim.eld.NodeParenteld;
-import simon.sormain.KeyValueStore.sim.eld.SimulationObserverELD;
+import simon.sormain.KeyValueStore.sim.multipaxos.NodeParentMultiPaxos;
+import simon.sormain.KeyValueStore.sim.multipaxos.NodeParentMultiPaxosProposer;
 import simon.sormain.KeyValueStore.sim.multipaxos.OpSequence;
 
-public class ScenarioGenMultiPaxos {
+
+public class ScenarioGentob {
 	static Operation setupOp = new Operation<SetupEvent>() {
         public SetupEvent generate() {
             return new SetupEvent() {
                 @Override
                 public void setupGlobalView(GlobalView gv) {
+                		gv.setValue("simulation.seqdelivered1", new OpSequence());
+                		gv.setValue("simulation.seqdelivered2", new OpSequence());
+                		gv.setValue("simulation.seqdelivered3", new OpSequence());
+                		gv.setValue("simulation.seqdelivered4", new OpSequence());
+                		gv.setValue("simulation.seqdelivered5", new OpSequence());
+                		// MultiPaxos
                 		gv.setValue("simulation.seqdecided1", new OpSequence());
                 		gv.setValue("simulation.seqdecided2", new OpSequence());
                 		gv.setValue("simulation.seqdecided3", new OpSequence());
@@ -57,7 +63,7 @@ public class ScenarioGenMultiPaxos {
                 @Override
                 public Map<String, Object> initConfigUpdate() {
                     HashMap<String, Object> config = new HashMap<String, Object>();
-                    config.put("simulation.checktimeout", 100);
+                    config.put("simulation.checktimeout", 1000);
                     return config;
                 }
                 
@@ -68,7 +74,7 @@ public class ScenarioGenMultiPaxos {
 
                 @Override
                 public Class getComponentDefinition() {
-                    return SimulationObserverMultiPaxos.class;
+                    return SimulationObservertob.class;
                 }
 
                 @Override
@@ -79,7 +85,6 @@ public class ScenarioGenMultiPaxos {
         }
     };
     
-    
     static Operation2 startNodeOp = new Operation2<StartNodeEvent, Long, Long>() {
 
         public StartNodeEvent generate(final Long self, final Long rank) {
@@ -87,6 +92,8 @@ public class ScenarioGenMultiPaxos {
                 TAddress selfAdr;
                 int selfrank;
                 MapRanks ranks = new MapRanks();
+                long initialDelay = 1000;
+                long deltaDelay = 500;
 
                 {
                     try {
@@ -108,6 +115,8 @@ public class ScenarioGenMultiPaxos {
                     config.put("keyvaluestore.self.addr", selfAdr);
                     config.put("keyvaluestore.self.rank", selfrank);
                     config.put("keyvaluestore.self.ranks", ranks);
+                    config.put("keyvaluestore.epfd.initDelay", initialDelay);
+                    config.put("keyvaluestore.epfd.deltaDelay", deltaDelay);
                     return config;
                 }
 
@@ -118,7 +127,7 @@ public class ScenarioGenMultiPaxos {
 
                 @Override
                 public Class getComponentDefinition() {
-                    return NodeParentMultiPaxos.class;
+                    return NodeParenttob.class;
                 }
 
                 @Override
@@ -134,14 +143,15 @@ public class ScenarioGenMultiPaxos {
         }
     };
     
-    
-    static Operation3 startNodeProposerOp = new Operation3<StartNodeEvent, Long, Long, Long>() {
+    static Operation3 startNodeSenderOp = new Operation3<StartNodeEvent, Long, Long, Long>() {
 
-        public StartNodeEvent generate(final Long self, final Long rank, final Long ratePropose) {
+        public StartNodeEvent generate(final Long self, final Long rank, final Long rateBc) {
             return new StartNodeEvent() {
                 TAddress selfAdr;
                 int selfrank;
                 MapRanks ranks = new MapRanks();
+                long initialDelay = 1000;
+                long deltaDelay = 500;
                 
 
                 {
@@ -164,8 +174,10 @@ public class ScenarioGenMultiPaxos {
                     config.put("keyvaluestore.self.addr", selfAdr);
                     config.put("keyvaluestore.self.rank", selfrank);
                     config.put("keyvaluestore.self.ranks", ranks);
-                    // rate at which proposer sends proposals
-                    config.put("simulation.ratePropose", ratePropose);
+                    config.put("keyvaluestore.epfd.initDelay", initialDelay);
+                    config.put("keyvaluestore.epfd.deltaDelay", deltaDelay);
+                    // rate at which sender sends ops
+                    config.put("simulation.ratebc", rateBc);
                     return config;
                 }
 
@@ -176,7 +188,7 @@ public class ScenarioGenMultiPaxos {
 
                 @Override
                 public Class getComponentDefinition() {
-                    return NodeParentMultiPaxosProposer.class;
+                    return NodeParenttobsender.class;
                 }
 
                 @Override
@@ -218,7 +230,7 @@ public class ScenarioGenMultiPaxos {
         }
     };
     
-    public static SimulationScenario multipaxos() {
+    public static SimulationScenario tob() {
         SimulationScenario scen = new SimulationScenario() {
             {
 
@@ -237,9 +249,9 @@ public class ScenarioGenMultiPaxos {
                 SimulationScenario.StochasticProcess launchNodes = new SimulationScenario.StochasticProcess() {
                     {
                     	eventInterArrivalTime(constant(1));
-                        raise(1, startNodeProposerOp, constant(10000), constant(1), constant(500));
-                        raise(1, startNodeProposerOp, constant(20000), constant(2), constant(2500));
-                        raise(1, startNodeOp, constant(30000), constant(3));
+                        raise(1, startNodeSenderOp, constant(10000), constant(1), constant(2000));
+                        raise(1, startNodeSenderOp, constant(20000), constant(2), constant(1500));
+                        raise(1, startNodeSenderOp, constant(30000), constant(3), constant(1750));
                         raise(1, startNodeOp, constant(40000), constant(4));
                         raise(1, startNodeOp, constant(50000), constant(5));
                     }
@@ -247,15 +259,19 @@ public class ScenarioGenMultiPaxos {
                 
                 SimulationScenario.StochasticProcess killNode = new SimulationScenario.StochasticProcess() {
                     {
+                    	eventInterArrivalTime(constant(1));
                         raise(1, killNodeOp, constant(10000));
+                        raise(1, killNodeOp, constant(40000));
                     }  
                 };
+
 
 
                 setup.start();
                 observer.startAfterTerminationOf(0, setup);
                 launchNodes.start();
-                terminateAfterTerminationOf(5000, launchNodes);
+                killNode.startAfterTerminationOf(4560, launchNodes);
+                terminateAfterTerminationOf(5000, killNode);
             }
         };
 

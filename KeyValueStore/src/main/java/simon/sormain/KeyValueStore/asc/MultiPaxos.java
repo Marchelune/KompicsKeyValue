@@ -62,7 +62,7 @@ public class MultiPaxos extends ComponentDefinition {
 	private Handler<Start> handleStart = new Handler<Start>() {
 		@Override
 		public void handle(Start event) {
-			logger.info("Multipaxos started.");
+			logger.info("{} Multipaxos started.", config().getValue("keyvaluestore.self.addr", TAddress.class));
 			t = prepts = ats = pts =al = pl = 0;
 			av = new ArrayList<Object>();
 			pv = new ArrayList<Object>();
@@ -200,7 +200,7 @@ public class MultiPaxos extends ComponentDefinition {
 			if(prepts == content.getTimestamp()){
 				while(al < content.getDecidedLength()){
 					trigger(new AscDecide(av.get(al) ), asc);
-					DecidedOp(av.get(al));	//Simu
+					DecidedOp((Operation) av.get(al));	//Simu
 					al++;
 				}
 			}
@@ -292,7 +292,5 @@ public class MultiPaxos extends ComponentDefinition {
         	break;
     		
         }
-        
-        
 	}
 }
