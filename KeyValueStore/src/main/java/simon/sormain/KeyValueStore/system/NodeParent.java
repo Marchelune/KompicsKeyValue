@@ -1,8 +1,14 @@
 package simon.sormain.KeyValueStore.system;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -40,6 +46,8 @@ import simon.sormain.KeyValueStore.eld.OmegaInit;
 
 
 public class NodeParent extends ComponentDefinition {
+	
+	private static final Logger logger = LoggerFactory.getLogger(NodeParent.class); //test
 
     Positive<Network> network = requires(Network.class);
     Positive<Timer> timer = requires(Timer.class);
@@ -49,8 +57,19 @@ public class NodeParent extends ComponentDefinition {
 		int selfRank = config().getValue("keyvaluestore.self.rank", Integer.class);
 		MapRanks mRanks = config().getValue("keyvaluestore.self.ranks", MapRanks.class);
 		TreeMap<Integer, TAddress> ranks = mRanks.getMap();
+		logger.info("{} ranks : {}", new Object[]{selfAddress, ranks}); // test
 		MapRanges mRanges = config().getValue("keyvaluestore.self.ranges", MapRanges.class);
 		HashMap<int[], Set<TAddress>> Ranges = mRanges.getMap();
+		
+		//
+		Set<int[]> keys = Ranges.keySet();
+	    Iterator<int[]> iterator = keys.iterator();
+	    while(iterator.hasNext()) {
+	    	int[] setElement = iterator.next();
+	    	logger.info("range :{}  addr: {}", new Object[]{Arrays.toString(setElement), Ranges.get(setElement)}); //test
+	    }
+	    //
+		
 		int rank = 0;
 		for(Entry<Integer,TAddress> e : ranks.entrySet()){
 			if(e.getValue().equals(selfAddress)){

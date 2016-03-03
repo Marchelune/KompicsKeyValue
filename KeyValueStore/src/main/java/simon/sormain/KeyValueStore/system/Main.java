@@ -30,13 +30,14 @@ public class Main {
         Serializers.register(HeartbeatRequestMessage.class, "epfdS");
         // conversions
         Conversions.register(new TAddressConverter());
+        Conversions.register(new SetTAddressConverter());
         Conversions.register(new RangeConverter());
         Conversions.register(new RanksConverter());
     }
     
     
     public static void main(String[] args) {
-                Kompics.createAndStart(NodeLaunch.class, 2);
+                Kompics.createAndStart(NodeHost.class, 2);
                 System.out.println("Starting Node");
                 try {
                     Thread.sleep(10000);

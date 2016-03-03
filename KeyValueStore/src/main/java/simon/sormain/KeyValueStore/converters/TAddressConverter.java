@@ -27,6 +27,7 @@ public class TAddressConverter implements Converter<TAddress> {
                 String[] ipport = ((String) o).split(":");
                 InetAddress ip = InetAddress.getByName(ipport[0]);
                 int port = Integer.parseInt(ipport[1]);
+                return new TAddress(ip, port);
             } catch (UnknownHostException ex) {
                 return null;
             }
