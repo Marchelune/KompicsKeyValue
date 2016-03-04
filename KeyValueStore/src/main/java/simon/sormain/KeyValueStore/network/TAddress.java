@@ -1,5 +1,6 @@
 package simon.sormain.KeyValueStore.network;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import se.sics.kompics.network.Address;
@@ -10,9 +11,13 @@ import se.sics.kompics.network.Address;
  * From Kompics tutorials
  *
  */
-public class TAddress implements Address {
+public class TAddress implements Address, Serializable {
 
-    private final InetSocketAddress isa;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5977196620574973717L;
+	private final InetSocketAddress isa;
 
     public TAddress(InetAddress addr, int port) {
         this.isa = new InetSocketAddress(addr, port);

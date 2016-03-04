@@ -1,13 +1,19 @@
 package simon.sormain.KeyValueStore.network;
 
+import java.io.Serializable;
+
 import se.sics.kompics.KompicsEvent;
 import se.sics.kompics.PatternExtractor;
 import se.sics.kompics.network.Msg;
 import se.sics.kompics.network.Transport;
 
-public class TMessage implements Msg<TAddress, THeader>, PatternExtractor<Class, KompicsEvent> {
+public class TMessage implements Msg<TAddress, THeader>, PatternExtractor<Class, KompicsEvent>, Serializable {
 
-    public final THeader header;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7894724505105288438L;
+	public final THeader header;
     public final KompicsEvent payload;
 
     public TMessage(TAddress src, TAddress dst, Transport protocol, KompicsEvent payload) {

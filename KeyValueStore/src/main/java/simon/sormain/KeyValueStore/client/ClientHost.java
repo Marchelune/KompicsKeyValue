@@ -8,10 +8,23 @@ import se.sics.kompics.Component;
 import se.sics.kompics.ComponentDefinition;
 import se.sics.kompics.Init;
 import se.sics.kompics.Kompics;
+import se.sics.kompics.config.Conversions;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.netty.NettyInit;
 import se.sics.kompics.network.netty.NettyNetwork;
+import se.sics.kompics.network.netty.serialization.JavaSerializer;
+import se.sics.kompics.network.netty.serialization.Serializers;
+import simon.sormain.KeyValueStore.converters.RangeConverter;
+import simon.sormain.KeyValueStore.converters.RanksConverter;
+import simon.sormain.KeyValueStore.converters.SetTAddressConverter;
+import simon.sormain.KeyValueStore.converters.TAddressConverter;
+import simon.sormain.KeyValueStore.epfd.HeartbeatReplyMessage;
+import simon.sormain.KeyValueStore.epfd.HeartbeatRequestMessage;
+import simon.sormain.KeyValueStore.network.EPFDSerializer;
+import simon.sormain.KeyValueStore.network.NetSerializer;
 import simon.sormain.KeyValueStore.network.TAddress;
+import simon.sormain.KeyValueStore.network.THeader;
+import simon.sormain.KeyValueStore.network.TMessage;
 
 /**
  * Launch this class to run a client.
@@ -19,12 +32,32 @@ import simon.sormain.KeyValueStore.network.TAddress;
  *
  */
 public class ClientHost extends ComponentDefinition {
+	
+    static {
+    	/*
+    	// register
+    	
+        Serializers.register(new NetSerializer(), "netS");
+        Serializers.register(new EPFDSerializer(), "epfdS");
+        // map
+        Serializers.register(TAddress.class, "netS");
+        Serializers.register(THeader.class, "netS");
+        Serializers.register(TMessage.class, "netS");
+        Serializers.register(HeartbeatReplyMessage.class, "epfdS");
+        Serializers.register(HeartbeatRequestMessage.class, "epfdS");
+        */
+        // conversions
+        Conversions.register(new TAddressConverter());
+        Conversions.register(new SetTAddressConverter());
+        Conversions.register(new RangeConverter());
+        Conversions.register(new RanksConverter());
+    }
 
 	public ClientHost() {
 		
 		try {
-			TAddress self = new TAddress(InetAddress.getByName("127.0.0.1"), 20423);
-			TAddress kvStore = new TAddress(InetAddress.getByName("127.0.0.1"), 20424);
+			TAddress self = new TAddress(InetAddress.getByName("192.168.1.4"), 45000);
+			TAddress kvStore = new TAddress(InetAddress.getByName("192.168.1.4"), 45671);
 			
 			Component network = create(NettyNetwork.class, new NettyInit(self));
 			Component console = create(JavaConsole.class, Init.NONE);

@@ -27,6 +27,9 @@ public abstract class Operation implements KompicsEvent, Serializable, Comparabl
 		this.key = key;
 	}
 	
+	public TAddress getAddress() {
+		return client;
+	}
 	
 	public int getKey() {
 		return key;

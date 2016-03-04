@@ -119,12 +119,11 @@ public class Epfd extends ComponentDefinition {
 	
 	ClassMatchedHandler<HeartbeatReplyMessage, TMessage> handleHeartbeatReplyMessage = new ClassMatchedHandler<HeartbeatReplyMessage, TMessage>() {
 		public void handle(HeartbeatReplyMessage content, TMessage context) {
-			//logger.info("{} got heartbeat from {}.", new Object[]{selfAddress, context.getSource()});
 			TAddress p = context.getSource();
 			if(suspected.contains(p) || seqnum == content.getSeqnum()) {
 				//logger.info("{}:  {} is alive.", new Object[]{selfAddress, context.getSource()});
 				alive.add(p);
-				//logger.info("{}:  alive : {} ", new Object[]{selfAddress, alive});
+				//logger.info("{}:  alive : {} ", new Object[]{selfAddress, p});
 			}	
 		}
 	};

@@ -68,6 +68,7 @@ public class Client extends ComponentDefinition {
 				}else{
 					info = info+ "FAIL : " + content.getStatus().details() + "\n";
 				}
+				//logger.info("{}", info); // test
 				trigger(new ConsoleLine(info), console);
 				//or logger.error(info) ?
 			}
@@ -106,6 +107,7 @@ public class Client extends ComponentDefinition {
 			Operation op = new PutOperation(self, sequenceNumber, Integer.parseInt(command[1]), command[2]);
 			
 			trigger( new TMessage(self, kvStore, Transport.TCP, op),net);
+			//logger.info("Sent Put to {}", kvStore); //test
 		}
 	}
 	

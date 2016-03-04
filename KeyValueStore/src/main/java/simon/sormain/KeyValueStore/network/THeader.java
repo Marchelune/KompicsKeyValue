@@ -1,11 +1,17 @@
 package simon.sormain.KeyValueStore.network;
 
+import java.io.Serializable;
+
 import se.sics.kompics.network.Header;
 import se.sics.kompics.network.Transport;
 
-public class THeader implements Header<TAddress> {
+public class THeader implements Header<TAddress>, Serializable {
 
-    public final TAddress src;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1337153676638542280L;
+	public final TAddress src;
     public final TAddress dst;
     public final Transport proto;
 
