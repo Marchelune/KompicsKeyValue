@@ -19,6 +19,7 @@ import simon.sormain.KeyValueStore.network.TMessage;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcast;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastPort;
 import simon.sormain.KeyValueStore.rBroadcast.BEDeliver;
+import simon.sormain.KeyValueStore.tob.TobDeliver;
 
 /**
  * This component is in charge of redirecting a client request (net port) to the right RG.
@@ -41,8 +42,12 @@ public class Router extends ComponentDefinition{
 	
 	public Router(RouterInit init) {
 		subscribe(handleStart, control);
-		subscribe(handleClientOperation,net);
-		subscribe(handleBEDOperation, beb);
+		subscribe(handleClientPutOperation, net);
+		subscribe(handleClientGetOperation, net);
+		subscribe(handleClientCASOperation, net);
+		subscribe(handleBEDPutOperation, beb);
+		subscribe(handleBEDGetOperation, beb);
+		subscribe(handleBEDCASOperation, beb);
 		
 		allRanges = init.getAllRanges();
 		self = init.getSelf();
@@ -51,26 +56,66 @@ public class Router extends ComponentDefinition{
 	private Handler<Start> handleStart = new Handler<Start>() {
 		@Override
 		public void handle(Start event) {
-			logger.info("Router started.");
+			logger.info("{} Router started.", self);
 			cache = new HashMap<Integer, Set<TAddress>>();
 		}
 	};
 	
-	private ClassMatchedHandler<Operation, TMessage> handleClientOperation = new ClassMatchedHandler<Operation, TMessage>() {
+
+	private ClassMatchedHandler<PutOperation, TMessage> handleClientPutOperation = new ClassMatchedHandler<PutOperation, TMessage>() {
 		@Override
-		public void handle(Operation content, TMessage context) {
+		public void handle(PutOperation content, TMessage context) {
+			logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}
 	};
 	
-	private ClassMatchedHandler<Operation, BEDeliver> handleBEDOperation = new ClassMatchedHandler<Operation, BEDeliver>() {
+	private ClassMatchedHandler<GetOperation, TMessage> handleClientGetOperation = new ClassMatchedHandler<GetOperation, TMessage>() {
 		@Override
-		public void handle(Operation content, BEDeliver context) {
+		public void handle(GetOperation content, TMessage context) {
+			logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			Set<TAddress> dst = correspondingRG(content.getKey());
+			trigger(new BEBroadcast(self, dst , content), beb);
+		}
+	};
+	
+	private ClassMatchedHandler<CASOperation, TMessage> handleClientCASOperation = new ClassMatchedHandler<CASOperation, TMessage>() {
+		@Override
+		public void handle(CASOperation content, TMessage context) {
+			logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			Set<TAddress> dst = correspondingRG(content.getKey());
+			trigger(new BEBroadcast(self, dst , content), beb);
+		}
+	};
+	
+	private ClassMatchedHandler<PutOperation, BEDeliver> handleBEDPutOperation = new ClassMatchedHandler<PutOperation, BEDeliver>() {
+		@Override
+		public void handle(PutOperation content, BEDeliver context) {
+			logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
 			trigger(content, routy);
 			
 		}
 	};
+	
+	private ClassMatchedHandler<GetOperation, BEDeliver> handleBEDGetOperation = new ClassMatchedHandler<GetOperation, BEDeliver>() {
+		@Override
+		public void handle(GetOperation content, BEDeliver context) {
+			logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
+			trigger(content, routy);
+			
+		}
+	};
+	
+	private ClassMatchedHandler<CASOperation, BEDeliver> handleBEDCASOperation = new ClassMatchedHandler<CASOperation, BEDeliver>() {
+		@Override
+		public void handle(CASOperation content, BEDeliver context) {
+			logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
+			trigger(content, routy);
+			
+		}
+	};
+	
 
 	/**
 	 * 
@@ -83,6 +128,7 @@ public class Router extends ComponentDefinition{
 			for (Entry<int[], Set<TAddress>> entry : allRanges.entrySet()) {
 			    int[] range = entry.getKey();
 			    if(key<range[1]){
+			    	logger.debug("RANGE" + Integer.toString(range[1])); //test
 			    	result = entry.getValue();
 			    	break;
 			    }

@@ -89,6 +89,7 @@ public class NodeParent extends ComponentDefinition {
         
         connect(app.getNegative(TotalOrderBroadcastPort.class),tob.getPositive(TotalOrderBroadcastPort.class), Channel.TWO_WAY);
         connect(app.getNegative(RouterPort.class),routy.getPositive(RouterPort.class), Channel.TWO_WAY);
+        connect(app.getNegative(Network.class), network, Channel.TWO_WAY);
         
 	}
 }

@@ -42,7 +42,6 @@ public class Client extends ComponentDefinition {
 		subscribe(handleStart, control);
 		subscribe(handleConsoleLine,console);
 		subscribe(handleOperationACK, net);
-		
 		self = init.getSelf();
 		kvStore = init.getKvStore();
 	}
@@ -52,12 +51,14 @@ public class Client extends ComponentDefinition {
 		public void handle(Start event) {
 			logger.info("Client started.");
 			sequenceNumber = 0;
+			replies = new HashSet<OperationACK>();
 		}
 	};
 	
 	private ClassMatchedHandler<OperationACK, TMessage> handleOperationACK = new ClassMatchedHandler<OperationACK, TMessage>() {
 		@Override
 		public void handle(OperationACK content, TMessage context) {
+			logger.info(" client got answer");
 			if(!replies.contains(content)){
 				replies.add(content);
 				String info = "New reply : operation " + content.getOp().getUniqueSequenceNumber() 
@@ -67,6 +68,7 @@ public class Client extends ComponentDefinition {
 				}else{
 					info = info+ "FAIL : " + content.getStatus().details() + "\n";
 				}
+				logger.info(info +"\n");
 				trigger(new ConsoleLine(info), console);
 				//or logger.error(info) ?
 			}
@@ -74,10 +76,12 @@ public class Client extends ComponentDefinition {
 		}
 	};
 	
+	
 	private Handler<ConsoleLine> handleConsoleLine = new Handler<ConsoleLine>() {
 		@Override
 		public void handle(ConsoleLine event) {
 			String[] command = event.getLine().trim().split("[\\(,\\)]");
+			logger.info("{} (client): received a command : {}", self, command);
 			sequenceNumber++;
 			if(command[0].equals("PUT")){
 				doPut(command,event);
@@ -103,7 +107,8 @@ public class Client extends ComponentDefinition {
 			badCommand(event);
 		}else{
 			Operation op = new PutOperation(self, sequenceNumber, Integer.parseInt(command[1]), command[2]);
-			trigger( new TMessage(self, kvStore, Transport.TCP, op),net);
+			trigger( new TMessage(self, kvStore, Transport.TCP, op), net);
+			logger.info("{} (client): sending {} to {} \n", self, op.toString(), kvStore);
 		}
 	}
 	
@@ -113,6 +118,7 @@ public class Client extends ComponentDefinition {
 		}else{
 			Operation op = new GetOperation(self, sequenceNumber, Integer.parseInt(command[1]));
 			trigger( new TMessage(self, kvStore, Transport.TCP, op),net);
+			logger.info("{} (client): sending {} to {} \n", self, op.toString(), kvStore);
 		}
 	}
 	
@@ -122,6 +128,7 @@ public class Client extends ComponentDefinition {
 		}else{
 			Operation op = new CASOperation(self, sequenceNumber, Integer.parseInt(command[1]),command[2],command[3]);
 			trigger( new TMessage(self, kvStore, Transport.TCP, op),net);
+			logger.info("{} (client): sending {} to {}", self, op.toString(), kvStore);
 		}
 	}
 	

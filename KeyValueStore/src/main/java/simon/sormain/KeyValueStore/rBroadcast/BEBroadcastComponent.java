@@ -67,7 +67,7 @@ public class BEBroadcastComponent extends ComponentDefinition {
 	private void msgRcv() {
         GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
         gv.setValue("simulation.rcvmsgs", gv.getValue("simulation.rcvmsgs", Integer.class) + 1);
-        TAddress selfaddr= config().getValue("keyvaluestore.self", TAddress.class);
+        TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
         switch (selfaddr.getPort()) {
         case 10000 :
         	gv.setValue("simulation.rcvmsgsone", gv.getValue("simulation.rcvmsgsone", Integer.class) + 1);

@@ -12,7 +12,7 @@ public class GetOperation extends Operation {
 
 	@Override
 	public String toString() {
-		return "(Client: "+ this.getClient().toString() + ";Seq: " + Integer.toString(this.getUniqueSequenceNumber()) +")";
+		return "GET ("+ Integer.toString(this.getKey())  + ")" +"(Client: "+ this.getClient().toString() + ";Seq: " + Integer.toString(this.getUniqueSequenceNumber()) +")";
 		// In the multipaxos Simu, all operations are GETs, we just want to uniquely identify the op
 				//"GET ("+ Integer.toString(this.getKey())  + ")";
 	}
