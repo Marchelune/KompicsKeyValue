@@ -25,6 +25,7 @@ import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.network.TMessage;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcastPort;
 import simon.sormain.KeyValueStore.sim.multipaxos.OpSequence;
+import simon.sormain.KeyValueStore.sim.tob.OpSet;
 
 public class Tob extends ComponentDefinition {
 	
@@ -71,6 +72,8 @@ public class Tob extends ComponentDefinition {
 			}else{
 				trigger(new TMessage(self, leader, Transport.TCP, new TobDeliver( event.getOp())), net);
 			}
+			//Simu
+			BroadcastOp(event.getOp());
 		}
 	};
 	
@@ -135,36 +138,59 @@ public class Tob extends ComponentDefinition {
 	private void DeliveredOp(Operation op) {
         GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
         TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
-        OpSequence DecidedSeq;
+        
+        OpSet GlobalDelivered = gv.getValue("simulation.globaldelivered", OpSet.class);
+        GlobalDelivered.add(op);
+        gv.setValue("simulation.globaldelivered", GlobalDelivered);
+        
+        OpSequence DeliveredSeq;
         switch (selfaddr.getPort()) {
         case 10000 :
-        	DecidedSeq = gv.getValue("simulation.seqdelivered1", OpSequence.class);
-        	DecidedSeq.add(op);
-        	gv.setValue("simulation.seqdelivered1", DecidedSeq);
+        	DeliveredSeq = gv.getValue("simulation.seqdelivered1", OpSequence.class);
+        	DeliveredSeq.add(op);
+        	gv.setValue("simulation.seqdelivered1", DeliveredSeq);
         	break;
         case 20000 :
-        	DecidedSeq = gv.getValue("simulation.seqdelivered2", OpSequence.class);
-        	DecidedSeq.add(op);
-        	gv.setValue("simulation.seqdelivered2", DecidedSeq);
+        	DeliveredSeq = gv.getValue("simulation.seqdelivered2", OpSequence.class);
+        	DeliveredSeq.add(op);
+        	gv.setValue("simulation.seqdelivered2", DeliveredSeq);
         	break;
         case 30000 :
-        	DecidedSeq = gv.getValue("simulation.seqdelivered3", OpSequence.class);
-        	DecidedSeq.add(op);
-        	gv.setValue("simulation.seqdelivered3", DecidedSeq);
+        	DeliveredSeq = gv.getValue("simulation.seqdelivered3", OpSequence.class);
+        	DeliveredSeq.add(op);
+        	gv.setValue("simulation.seqdelivered3", DeliveredSeq);
         	break;
         case 40000 :
-        	DecidedSeq = gv.getValue("simulation.seqdelivered4", OpSequence.class);
-        	DecidedSeq.add(op);
-        	gv.setValue("simulation.seqdelivered4", DecidedSeq);
+        	DeliveredSeq = gv.getValue("simulation.seqdelivered4", OpSequence.class);
+        	DeliveredSeq.add(op);
+        	gv.setValue("simulation.seqdelivered4", DeliveredSeq);
         	break;
         case 50000 :
-        	DecidedSeq = gv.getValue("simulation.seqdelivered5", OpSequence.class);
-        	DecidedSeq.add(op);
-        	gv.setValue("simulation.seqdelivered5", DecidedSeq);
+        	DeliveredSeq = gv.getValue("simulation.seqdelivered5", OpSequence.class);
+        	DeliveredSeq.add(op);
+        	gv.setValue("simulation.seqdelivered5", DeliveredSeq);
         	break;
     		
         }
 	}
 
+	private void BroadcastOp(Operation op) {
+        GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+        TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
+        OpSequence BcSeq;
+        switch (selfaddr.getPort()) {
+        case 20000 :
+        	BcSeq = gv.getValue("simulation.seqbc2", OpSequence.class);
+        	BcSeq.add(op);
+        	gv.setValue("simulation.seqbc2", BcSeq);
+        	break;
+        case 30000 :
+        	BcSeq = gv.getValue("simulation.seqbc3", OpSequence.class);
+        	BcSeq.add(op);
+        	gv.setValue("simulation.seqbc3", BcSeq);
+        	break;
+    		
+        }
+	}
 
 }

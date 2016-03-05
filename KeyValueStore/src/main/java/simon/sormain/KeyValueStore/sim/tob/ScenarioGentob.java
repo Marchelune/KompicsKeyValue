@@ -31,17 +31,22 @@ public class ScenarioGentob {
             return new SetupEvent() {
                 @Override
                 public void setupGlobalView(GlobalView gv) {
+                		gv.setValue("simulation.seqbc2", new OpSequence());
+                		gv.setValue("simulation.seqbc3", new OpSequence());
                 		gv.setValue("simulation.seqdelivered1", new OpSequence());
                 		gv.setValue("simulation.seqdelivered2", new OpSequence());
                 		gv.setValue("simulation.seqdelivered3", new OpSequence());
                 		gv.setValue("simulation.seqdelivered4", new OpSequence());
                 		gv.setValue("simulation.seqdelivered5", new OpSequence());
+                		// all operations that were delivered
+                		gv.setValue("simulation.globaldelivered", new OpSet());
                 		// MultiPaxos
                 		gv.setValue("simulation.seqdecided1", new OpSequence());
                 		gv.setValue("simulation.seqdecided2", new OpSequence());
                 		gv.setValue("simulation.seqdecided3", new OpSequence());
                 		gv.setValue("simulation.seqdecided4", new OpSequence());
                 		gv.setValue("simulation.seqdecided5", new OpSequence());
+                		gv.setValue("simulation.proposedcommands", new OpSequence());
                 }
             };
         }
@@ -63,7 +68,7 @@ public class ScenarioGentob {
                 @Override
                 public Map<String, Object> initConfigUpdate() {
                     HashMap<String, Object> config = new HashMap<String, Object>();
-                    config.put("simulation.checktimeout", 1000);
+                    config.put("simulation.checktimeout", 2000);
                     return config;
                 }
                 
@@ -249,7 +254,7 @@ public class ScenarioGentob {
                 SimulationScenario.StochasticProcess launchNodes = new SimulationScenario.StochasticProcess() {
                     {
                     	eventInterArrivalTime(constant(1));
-                        raise(1, startNodeSenderOp, constant(10000), constant(1), constant(2000));
+                        raise(1, startNodeSenderOp, constant(10000), constant(1), constant(1000));
                         raise(1, startNodeSenderOp, constant(20000), constant(2), constant(1500));
                         raise(1, startNodeSenderOp, constant(30000), constant(3), constant(1750));
                         raise(1, startNodeOp, constant(40000), constant(4));

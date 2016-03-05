@@ -18,8 +18,10 @@ import se.sics.kompics.simulator.events.system.KillNodeEvent;
 import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.util.GlobalView;
+import simon.sormain.KeyValueStore.converters.MapRanks;
 import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.*;
+import simon.sormain.KeyValueStore.sim.tob.OpSet;
 import simon.sormain.KeyValueStore.system.*;
 import static java.lang.Math.toIntExact;
 
@@ -30,13 +32,13 @@ public class ScenarioGenBEBBc {
             return new SetupEvent() {
                 @Override
                 public void setupGlobalView(GlobalView gv) {
-                    gv.setValue("simulation.sentmsgs", 0);
-                    gv.setValue("simulation.rcvmsgs", 0);
-                    gv.setValue("simulation.rcvmsgsone", 0);
-                    gv.setValue("simulation.rcvmsgstwo", 0);
-                    gv.setValue("simulation.rcvmsgsthree", 0);
-                    gv.setValue("simulation.rcvmsgsfour", 0);
-                    gv.setValue("simulation.rcvmsgsfive", 0);
+                    gv.setValue("simulation.BEBmsgs", new OpSet());
+                    gv.setValue("simulation.BEBdelmsgs1", new OpSet());
+                    gv.setValue("simulation.BEBdelmsgs2", new OpSet());
+                    gv.setValue("simulation.BEBdelmsgs3", new OpSet());
+                    gv.setValue("simulation.BEBdelmsgs4", new OpSet());
+                    gv.setValue("simulation.BEBdelmsgs5", new OpSet());
+
                 }
             };
         }
@@ -58,7 +60,7 @@ public class ScenarioGenBEBBc {
                 @Override
                 public Map<String, Object> initConfigUpdate() {
                     HashMap<String, Object> config = new HashMap<String, Object>();
-                    config.put("simulation.checktimeout", 10);
+                    config.put("simulation.checktimeout", 500);
                     return config;
                 }
                 
@@ -86,19 +88,17 @@ public class ScenarioGenBEBBc {
         public StartNodeEvent generate(final Long self) {
             return new StartNodeEvent() {
                 TAddress selfAdr;
-                SetTAddress allAddr = new SetTAddress();
-                long initialDelay = 1000;
-                long deltaDelay = 500;
-                long senderDelay = 2;
+                MapRanks ranks = new MapRanks();
+                long sendertimeout = 1000;
 
                 {
                     try {
                         selfAdr = new TAddress(InetAddress.getByName("192.168.0.1"), toIntExact(self));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 10000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 20000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 30000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 40000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 50000));
+                        ranks.put(1, new TAddress(InetAddress.getByName("192.168.0.1"), 10000));
+                        ranks.put(2,new TAddress(InetAddress.getByName("192.168.0.1"), 20000));
+                        ranks.put(3,new TAddress(InetAddress.getByName("192.168.0.1"), 30000));
+                        ranks.put(4,new TAddress(InetAddress.getByName("192.168.0.1"), 40000));
+                        ranks.put(5,new TAddress(InetAddress.getByName("192.168.0.1"), 50000));
                     } catch (UnknownHostException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -107,11 +107,9 @@ public class ScenarioGenBEBBc {
                 @Override
                 public Map<String, Object> initConfigUpdate() {
                     HashMap<String, Object> config = new HashMap<String, Object>();
-                    config.put("keyvaluestore.self", selfAdr);
-                    config.put("keyvaluestore.epfd.allAddr", allAddr);
-                    config.put("keyvaluestore.epfd.initDelay", initialDelay);
-                    config.put("keyvaluestore.epfd.deltaDelay", deltaDelay);
-                    config.put("simulation.sendertimeout", senderDelay);
+                    config.put("keyvaluestore.self.addr", selfAdr);
+                    config.put("keyvaluestore.self.ranks", ranks);
+                    config.put("simulation.sendertimeout", sendertimeout);
                     return config;
                 }
 
@@ -143,18 +141,16 @@ public class ScenarioGenBEBBc {
         public StartNodeEvent generate(final Long self) {
             return new StartNodeEvent() {
                 TAddress selfAdr;
-                SetTAddress allAddr = new SetTAddress();
-                long initialDelay = 1000;
-                long deltaDelay = 500;
+                MapRanks ranks = new MapRanks();
 
                 {
                     try {
                         selfAdr = new TAddress(InetAddress.getByName("192.168.0.1"), toIntExact(self));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 10000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 20000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 30000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 40000));
-                        allAddr.add(new TAddress(InetAddress.getByName("192.168.0.1"), 50000));
+                        ranks.put(1, new TAddress(InetAddress.getByName("192.168.0.1"), 10000));
+                        ranks.put(2,new TAddress(InetAddress.getByName("192.168.0.1"), 20000));
+                        ranks.put(3,new TAddress(InetAddress.getByName("192.168.0.1"), 30000));
+                        ranks.put(4,new TAddress(InetAddress.getByName("192.168.0.1"), 40000));
+                        ranks.put(5,new TAddress(InetAddress.getByName("192.168.0.1"), 50000));
                     } catch (UnknownHostException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -163,10 +159,8 @@ public class ScenarioGenBEBBc {
                 @Override
                 public Map<String, Object> initConfigUpdate() {
                     HashMap<String, Object> config = new HashMap<String, Object>();
-                    config.put("keyvaluestore.self", selfAdr);
-                    config.put("keyvaluestore.epfd.allAddr", allAddr);
-                    config.put("keyvaluestore.epfd.initDelay", initialDelay);
-                    config.put("keyvaluestore.epfd.deltaDelay", deltaDelay);
+                    config.put("keyvaluestore.self.addr", selfAdr);
+                    config.put("keyvaluestore.self.ranks", ranks);
                     return config;
                 }
 
@@ -177,7 +171,7 @@ public class ScenarioGenBEBBc {
 
                 @Override
                 public Class getComponentDefinition() {
-                    return NodeParent.class;
+                    return NodeParentBeb.class;
                 }
 
                 @Override
@@ -238,14 +232,10 @@ public class ScenarioGenBEBBc {
                     }
                 };
 
-                SimulationScenario.StochasticProcess launchSender = new SimulationScenario.StochasticProcess() {
-                    {
-                        raise(1, startSenderOp, constant(10000));
-                    }
-                };
                 SimulationScenario.StochasticProcess launchNodes = new SimulationScenario.StochasticProcess() {
                     {
-                        eventInterArrivalTime(constant(1000));
+                        eventInterArrivalTime(constant(1));
+                        raise(1, startSenderOp, constant(10000));
                         raise(1, startNodeOp, constant(20000));
                         raise(1, startNodeOp, constant(30000));
                         raise(1, startNodeOp, constant(40000));
@@ -263,9 +253,7 @@ public class ScenarioGenBEBBc {
                 setup.start();
                 observer.startAfterTerminationOf(0, setup);
                 launchNodes.start();
-                launchSender.startAfterTerminationOf(1000,launchNodes);
-                killNode.startAfterTerminationOf(500, launchSender);
-                terminateAfterTerminationOf(100, killNode);
+                terminateAfterTerminationOf(5000, launchNodes);
             }
         };
 

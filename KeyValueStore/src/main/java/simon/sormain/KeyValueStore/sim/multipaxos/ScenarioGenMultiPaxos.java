@@ -36,6 +36,7 @@ public class ScenarioGenMultiPaxos {
                 		gv.setValue("simulation.seqdecided3", new OpSequence());
                 		gv.setValue("simulation.seqdecided4", new OpSequence());
                 		gv.setValue("simulation.seqdecided5", new OpSequence());
+                		gv.setValue("simulation.proposedcommands", new OpSequence());
                 }
             };
         }
@@ -57,7 +58,7 @@ public class ScenarioGenMultiPaxos {
                 @Override
                 public Map<String, Object> initConfigUpdate() {
                     HashMap<String, Object> config = new HashMap<String, Object>();
-                    config.put("simulation.checktimeout", 100);
+                    config.put("simulation.checktimeout", 400);
                     return config;
                 }
                 
@@ -247,7 +248,7 @@ public class ScenarioGenMultiPaxos {
                 
                 SimulationScenario.StochasticProcess killNode = new SimulationScenario.StochasticProcess() {
                     {
-                        raise(1, killNodeOp, constant(10000));
+                        raise(1, killNodeOp, constant(50000));
                     }  
                 };
 
@@ -255,6 +256,7 @@ public class ScenarioGenMultiPaxos {
                 setup.start();
                 observer.startAfterTerminationOf(0, setup);
                 launchNodes.start();
+                killNode.startAfterTerminationOf(2500,launchNodes);
                 terminateAfterTerminationOf(5000, launchNodes);
             }
         };

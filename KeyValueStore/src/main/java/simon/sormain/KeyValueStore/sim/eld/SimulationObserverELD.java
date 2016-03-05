@@ -1,5 +1,7 @@
 package simon.sormain.KeyValueStore.sim.eld;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -47,25 +49,27 @@ private static final Logger LOG = LoggerFactory.getLogger(SimulationObserverELD.
     Handler<CheckTimeout> handleCheck = new Handler<CheckTimeout>() {
         @Override
         public void handle(CheckTimeout event) {
-            GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+        	GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+        	TAddress leader1 = gv.getValue("simulation.leader1", TAddress.class);
+        	TAddress leader2 = gv.getValue("simulation.leader2", TAddress.class);
+        	TAddress leader3 = gv.getValue("simulation.leader3", TAddress.class);
+        	TAddress leader4 = gv.getValue("simulation.leader4", TAddress.class);
+        	TAddress leader5 = gv.getValue("simulation.leader5", TAddress.class);
+
             if(gv.getDeadNodes().size() == 0){
-            	if(gv.getValue("simulation.leader1", TAddress.class).equals(gv.getValue("simulation.leader2", TAddress.class)) &&
-            		gv.getValue("simulation.leader2", TAddress.class).equals(gv.getValue("simulation.leader3", TAddress.class)) &&
-            		gv.getValue("simulation.leader3", TAddress.class).equals(gv.getValue("simulation.leader4", TAddress.class)) &&
-            		gv.getValue("simulation.leader4", TAddress.class).equals(gv.getValue("simulation.leader5", TAddress.class))) {
+            	if(leader1.equals(leader2) && leader2.equals(leader3) &&
+            		leader3.equals(leader4) && leader4.equals(leader5)) {
             	
-            		LOG.info("ELD : TRUE, all nodes trust the same leader, {} .", gv.getValue("simulation.leader1", TAddress.class));
+            		LOG.info("ELD : TRUE, all correct nodes trust the same correct leader, {} .\n", gv.getValue("simulation.leader1", TAddress.class));
             	} else {
-            		LOG.info("ELD: FALSE, every node does not trust the same leader.");
+            		LOG.info("ELD : FALSE, every correct node does not trust the same correct leader.\n");
             	}
             } else {
-            
-            	if(gv.getDeadNodes().size() > 0 && gv.getValue("simulation.leader2", TAddress.class).equals(gv.getValue("simulation.leader3", TAddress.class)) &&
-            			gv.getValue("simulation.leader3", TAddress.class).equals(gv.getValue("simulation.leader4", TAddress.class)) &&
-            			gv.getValue("simulation.leader4", TAddress.class).equals(gv.getValue("simulation.leader5", TAddress.class))) {
-            		LOG.info("ELD : FIRST NODE DEAD, TRUE, all nodes trust the same leader, {} .", gv.getValue("simulation.leader2", TAddress.class));
+            	LOG.info("ELD : FIRST NODE DEAD");
+            	if( leader2.equals(leader3) && leader3.equals(leader4) && leader4.equals(leader5) && trustCorrectLeader()) {
+            		LOG.info("ELD : TRUE, all correct nodes trust the same correct leader, {} .\n", gv.getValue("simulation.leader2", TAddress.class));
             	} else {
-            		LOG.info("ELD : FIRST NODE DEAD, FALSE, every node does not trust the same leader.");
+            		LOG.info("ELD : FALSE \n");
             	}
             }
         }
@@ -85,5 +89,25 @@ private static final Logger LOG = LoggerFactory.getLogger(SimulationObserverELD.
         public CheckTimeout(SchedulePeriodicTimeout spt) {
             super(spt);
         }
+    }
+    
+    public boolean trustCorrectLeader(){
+    	TAddress addr1 = null;
+    	try {
+			addr1 = new TAddress(InetAddress.getByName("192.168.0.1"), 10000);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+    	TAddress leader2 = gv.getValue("simulation.leader2", TAddress.class);
+    	TAddress leader3 = gv.getValue("simulation.leader3", TAddress.class);
+    	TAddress leader4 = gv.getValue("simulation.leader4", TAddress.class);
+    	TAddress leader5 = gv.getValue("simulation.leader5", TAddress.class);
+    	if(leader2.equals(addr1) || leader3.equals(addr1) || leader4.equals(addr1) || leader5.equals(addr1)){
+    		return false;
+    	} else {
+    		return true;
+    	}
     }
 }

@@ -1,5 +1,6 @@
 package simon.sormain.KeyValueStore.sim.beb;
 
+import java.util.Iterator;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,9 @@ import se.sics.kompics.timer.CancelPeriodicTimeout;
 import se.sics.kompics.timer.SchedulePeriodicTimeout;
 import se.sics.kompics.timer.Timeout;
 import se.sics.kompics.timer.Timer;
+import simon.sormain.KeyValueStore.app.Operation;
+import simon.sormain.KeyValueStore.sim.multipaxos.OpSequence;
+import simon.sormain.KeyValueStore.sim.tob.OpSet;
 
 
 public class SimulationObserverBEB extends ComponentDefinition {
@@ -48,17 +52,11 @@ public class SimulationObserverBEB extends ComponentDefinition {
     Handler<CheckTimeout> handleCheck = new Handler<CheckTimeout>() {
         @Override
         public void handle(CheckTimeout event) {
-            GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
-            if(gv.getDeadNodes().size() > 0) {
-                LOG.info("The sender is dead");
-            }
-            LOG.info("{} messages have been sent by the sender", gv.getValue("simulation.sentmsgs", Integer.class));
-            LOG.info(" TOTAL : {} messages have been received", gv.getValue("simulation.rcvmsgs", Integer.class));
-            LOG.info(" NODE ONE : {} messages have been received", gv.getValue("simulation.rcvmsgsone", Integer.class));
-            LOG.info(" NODE TWO : {} messages have been received", gv.getValue("simulation.rcvmsgstwo", Integer.class));
-            LOG.info(" NODE THREE : {} messages have been received", gv.getValue("simulation.rcvmsgsthree", Integer.class));
-            LOG.info(" NODE FOUR : {} messages have been received", gv.getValue("simulation.rcvmsgsfour", Integer.class));
-            LOG.info(" NODE FIVE : {} messages have been received", gv.getValue("simulation.rcvmsgsfive", Integer.class));
+            
+            LOG.info("BEB : CORRECTNESS (Best-Effort Validity) {} \n", checkValidity());
+
+  
+            
         }
     };
 
@@ -77,5 +75,27 @@ public class SimulationObserverBEB extends ComponentDefinition {
         public CheckTimeout(SchedulePeriodicTimeout spt) {
             super(spt);
         }
+    }
+    
+    public boolean checkValidity(){
+    	GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+
+    	OpSet bebmsgs = gv.getValue("simulation.BEBmsgs", OpSet.class);
+    	OpSet delivered1 = gv.getValue("simulation.BEBdelmsgs1", OpSet.class);
+    	OpSet delivered2 = gv.getValue("simulation.BEBdelmsgs2", OpSet.class);
+    	OpSet delivered3 = gv.getValue("simulation.BEBdelmsgs3", OpSet.class);
+    	OpSet delivered4 = gv.getValue("simulation.BEBdelmsgs4", OpSet.class);
+    	OpSet delivered5 = gv.getValue("simulation.BEBdelmsgs5", OpSet.class);
+    	
+    	Iterator<Operation> itbeb = bebmsgs.iterator();
+    	
+    	while(itbeb.hasNext()){
+    		Operation nextop = itbeb.next();
+    		if(!delivered1.contains(nextop) || !delivered2.contains(nextop) || 
+    				!delivered3.contains(nextop) ||!delivered4.contains(nextop) ||!delivered5.contains(nextop)){
+    			return false;
+    		}
+    	}
+    	return true;
     }
 }

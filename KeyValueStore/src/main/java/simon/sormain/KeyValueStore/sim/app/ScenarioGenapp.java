@@ -21,6 +21,7 @@ import simon.sormain.KeyValueStore.converters.MapRanges;
 import simon.sormain.KeyValueStore.converters.MapRanks;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.sim.multipaxos.OpSequence;
+import simon.sormain.KeyValueStore.sim.tob.OpSet;
 import simon.sormain.KeyValueStore.system.NodeParent;
 
 public class ScenarioGenapp {
@@ -30,25 +31,28 @@ public class ScenarioGenapp {
                 @Override
                 public void setupGlobalView(GlobalView gv) {
                 	    //tob
+            			gv.setValue("simulation.seqbc2", new OpSequence());
+            			gv.setValue("simulation.seqbc3", new OpSequence());
                 		gv.setValue("simulation.seqdelivered1", new OpSequence());
                 		gv.setValue("simulation.seqdelivered2", new OpSequence());
                 		gv.setValue("simulation.seqdelivered3", new OpSequence());
                 		gv.setValue("simulation.seqdelivered4", new OpSequence());
                 		gv.setValue("simulation.seqdelivered5", new OpSequence());
+                		gv.setValue("simulation.globaldelivered", new OpSet());
                 		// MultiPaxos
                 		gv.setValue("simulation.seqdecided1", new OpSequence());
                 		gv.setValue("simulation.seqdecided2", new OpSequence());
                 		gv.setValue("simulation.seqdecided3", new OpSequence());
                 		gv.setValue("simulation.seqdecided4", new OpSequence());
                 		gv.setValue("simulation.seqdecided5", new OpSequence());
+                		gv.setValue("simulation.proposedcommands", new OpSequence());
                 		//beb
-                        gv.setValue("simulation.sentmsgs", 0);
-                        gv.setValue("simulation.rcvmsgs", 0);
-                        gv.setValue("simulation.rcvmsgsone", 0);
-                        gv.setValue("simulation.rcvmsgstwo", 0);
-                        gv.setValue("simulation.rcvmsgsthree", 0);
-                        gv.setValue("simulation.rcvmsgsfour", 0);
-                        gv.setValue("simulation.rcvmsgsfive", 0);
+                        gv.setValue("simulation.BEBmsgs", new OpSet());
+                        gv.setValue("simulation.BEBdelmsgs1", new OpSet());
+                        gv.setValue("simulation.BEBdelmsgs2", new OpSet());
+                        gv.setValue("simulation.BEBdelmsgs3", new OpSet());
+                        gv.setValue("simulation.BEBdelmsgs4", new OpSet());
+                        gv.setValue("simulation.BEBdelmsgs5", new OpSet());
                         //eld
                         try{
 	                		gv.setValue("simulation.leader1", new TAddress(InetAddress.getByName("0.0.0.0"), 0));

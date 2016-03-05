@@ -69,7 +69,7 @@ private static final Logger logger = LoggerFactory.getLogger(Store.class);
 			storedValues.put(content.getKey(), content.getValue());
 			trigger(new TMessage(self, content.getClient(), Transport.TCP, 
 					new OperationACK(content, Status.SUCCESS, content.getValue())), net);
-			logger.info("sending ACK for PUT to {} ",content.getClient());
+			//logger.info("sending ACK for PUT to {} ",content.getClient());
 		}
 	};
 	
@@ -81,7 +81,7 @@ private static final Logger logger = LoggerFactory.getLogger(Store.class);
 			if(result != null){
 				trigger(new TMessage(self, content.getClient(), Transport.TCP, 
 						new OperationACK(content, Status.SUCCESS, result)), net);
-				logger.info("sending ACK for GET to {} ",content.getClient());
+				//logger.info("sending ACK for GET to {} ",content.getClient());
 			}else{
 				logger.error(content.toString() + " FAILED !");
 				trigger(new TMessage(self, content.getClient(), Transport.TCP, 

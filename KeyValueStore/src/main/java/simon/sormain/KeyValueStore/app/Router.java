@@ -65,7 +65,7 @@ public class Router extends ComponentDefinition{
 	private ClassMatchedHandler<PutOperation, TMessage> handleClientPutOperation = new ClassMatchedHandler<PutOperation, TMessage>() {
 		@Override
 		public void handle(PutOperation content, TMessage context) {
-			logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			//logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}
@@ -74,7 +74,7 @@ public class Router extends ComponentDefinition{
 	private ClassMatchedHandler<GetOperation, TMessage> handleClientGetOperation = new ClassMatchedHandler<GetOperation, TMessage>() {
 		@Override
 		public void handle(GetOperation content, TMessage context) {
-			logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			//logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}
@@ -83,7 +83,7 @@ public class Router extends ComponentDefinition{
 	private ClassMatchedHandler<CASOperation, TMessage> handleClientCASOperation = new ClassMatchedHandler<CASOperation, TMessage>() {
 		@Override
 		public void handle(CASOperation content, TMessage context) {
-			logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			//logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}

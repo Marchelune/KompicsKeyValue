@@ -12,8 +12,10 @@ import se.sics.kompics.Start;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
 import se.sics.kompics.simulator.util.GlobalView;
+import simon.sormain.KeyValueStore.app.Operation;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.network.TMessage;
+import simon.sormain.KeyValueStore.sim.tob.OpSet;
 
 /*
  * \brief implements a best effort broadcast algorithm.
@@ -44,7 +46,7 @@ public class BEBroadcastComponent extends ComponentDefinition {
 			for(TAddress dst : event.getDst()){
 				trigger(new TMessage(event.getSrc(), dst, Transport.TCP, new BEDeliver(event.getPayload(),event.getSrc())), net);
 				//using BEDeliver here to convey and encapsulate the message to be able to pattern-march it 
-				msgSent(); //Simu
+				msgSent((Operation) event.getPayload()); //Simu
 			}
 			
 		}
@@ -54,35 +56,48 @@ public class BEBroadcastComponent extends ComponentDefinition {
 	
 	private ClassMatchedHandler<BEDeliver, TMessage> handleBEBMessage = new ClassMatchedHandler<BEDeliver, TMessage>() {
 		public void handle(BEDeliver content, TMessage context) {
-			msgRcv(); //Simu
+			msgRcv((Operation) content.getPayload()); //Simu
 			trigger(content, beb);
 		}
 	};
 	
-	private void msgSent() {
+	private void msgSent(Operation op) {
         GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
-        gv.setValue("simulation.sentmsgs", gv.getValue("simulation.sentmsgs", Integer.class) + 1);
+        OpSet BebOps = gv.getValue("simulation.BEBmsgs", OpSet.class);
+        BebOps.add(op);
+        gv.setValue("simulation.BEBmsgs", BebOps);
 	}
 	
-	private void msgRcv() {
+	private void msgRcv(Operation op) {
         GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
-        gv.setValue("simulation.rcvmsgs", gv.getValue("simulation.rcvmsgs", Integer.class) + 1);
+        
         TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
+        OpSet BebOps;
         switch (selfaddr.getPort()) {
         case 10000 :
-        	gv.setValue("simulation.rcvmsgsone", gv.getValue("simulation.rcvmsgsone", Integer.class) + 1);
+            BebOps = gv.getValue("simulation.BEBdelmsgs1", OpSet.class);
+            BebOps.add(op);
+            gv.setValue("simulation.BEBdelmsgs1", BebOps);
         	break;
         case 20000 :
-        	gv.setValue("simulation.rcvmsgstwo", gv.getValue("simulation.rcvmsgstwo", Integer.class) + 1);
+            BebOps = gv.getValue("simulation.BEBdelmsgs2", OpSet.class);
+            BebOps.add(op);
+            gv.setValue("simulation.BEBdelmsgs2", BebOps);
         	break;
         case 30000 :
-        	gv.setValue("simulation.rcvmsgsthree", gv.getValue("simulation.rcvmsgsthree", Integer.class) + 1);
+            BebOps = gv.getValue("simulation.BEBdelmsgs3", OpSet.class);
+            BebOps.add(op);
+            gv.setValue("simulation.BEBdelmsgs3", BebOps);
         	break;
         case 40000 :
-        	gv.setValue("simulation.rcvmsgsfour", gv.getValue("simulation.rcvmsgsfour", Integer.class) + 1);
+            BebOps = gv.getValue("simulation.BEBdelmsgs4", OpSet.class);
+            BebOps.add(op);
+            gv.setValue("simulation.BEBdelmsgs4", BebOps);
         	break;
         case 50000 :
-        	gv.setValue("simulation.rcvmsgsfive", gv.getValue("simulation.rcvmsgsfive", Integer.class) + 1);
+            BebOps = gv.getValue("simulation.BEBdelmsgs5", OpSet.class);
+            BebOps.add(op);
+            gv.setValue("simulation.BEBdelmsgs5", BebOps);
         	break;
     		
         }

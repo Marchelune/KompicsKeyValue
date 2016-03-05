@@ -1,6 +1,7 @@
 package simon.sormain.KeyValueStore.sim.beb;
 
 import java.util.HashSet;
+import java.util.TreeMap;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,8 @@ import se.sics.kompics.timer.CancelPeriodicTimeout;
 import se.sics.kompics.timer.SchedulePeriodicTimeout;
 import se.sics.kompics.timer.Timeout;
 import se.sics.kompics.timer.Timer;
+import simon.sormain.KeyValueStore.app.GetOperation;
+import simon.sormain.KeyValueStore.converters.MapRanks;
 import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.rBroadcast.BEBroadcast;
@@ -25,6 +28,11 @@ public class BebSender extends ComponentDefinition {
     Positive<Timer> timer = requires(Timer.class);
     Positive<BEBroadcastPort> bebport = requires(BEBroadcastPort.class);
     private UUID timerId;
+	TAddress selfAddress;
+	MapRanks mRanks;
+	TreeMap<Integer, TAddress> Ranks;
+	HashSet<TAddress> alladdr;
+	private int seqnum;
     
     public BebSender() {
     	subscribe(handleStart, control);
@@ -35,6 +43,12 @@ public class BebSender extends ComponentDefinition {
         @Override
         public void handle(Start event) {
             schedulePeriodicCheck();
+            selfAddress = config().getValue("keyvaluestore.self.addr", TAddress.class);
+            mRanks = config().getValue("keyvaluestore.self.ranks", MapRanks.class);
+            Ranks = mRanks.getMap();
+         // Get all addrs using Ranks
+            alladdr = new HashSet<TAddress>(Ranks.values());
+            seqnum = 0;
         }
     };
     
@@ -46,9 +60,9 @@ public class BebSender extends ComponentDefinition {
     Handler<SendTimeout> handleSendTimeout = new Handler<SendTimeout>() {
         @Override
         public void handle(SendTimeout event) {
-        	TAddress selfaddr = config().getValue("keyvaluestore.self", TAddress.class);
-        	HashSet<TAddress> alladdr = config().getValue("keyvaluestore.epfd.allAddr", SetTAddress.class).get();
-        	trigger(new BEBroadcast(selfaddr,alladdr, null), bebport);
+        	seqnum++;
+        	GetOperation op = new GetOperation(selfAddress, seqnum, 0);
+        	trigger(new BEBroadcast(selfAddress, alladdr, op), bebport);
         }
     };
     

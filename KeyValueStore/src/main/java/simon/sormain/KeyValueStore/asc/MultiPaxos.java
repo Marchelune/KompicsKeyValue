@@ -76,6 +76,11 @@ public class MultiPaxos extends ComponentDefinition {
 	private Handler<AscPropose> handlePropose = new Handler<AscPropose>() {
 		@Override
 		public void handle(AscPropose event) {
+			
+			//Simu
+			ProposedOp((Operation) event.getValue());
+			
+			
 			t++;
 			if(pts==0){ //proposer timestamp
 				pts = N*t + selfRank;
@@ -292,5 +297,12 @@ public class MultiPaxos extends ComponentDefinition {
         	break;
     		
         }
+	}
+	
+	private void ProposedOp(Operation op){
+		GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+		OpSequence ProposedSeq = gv.getValue("simulation.proposedcommands", OpSequence.class);
+		ProposedSeq.add(op);
+		gv.setValue("simulation.proposedcommands", ProposedSeq);
 	}
 }

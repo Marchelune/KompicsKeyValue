@@ -179,7 +179,7 @@ public class ScenarioGeneld {
 
 	                SimulationScenario.StochasticProcess launchNodes = new SimulationScenario.StochasticProcess() {
 	                    {
-	                        eventInterArrivalTime(constant(1000));
+	                        eventInterArrivalTime(constant(1));
 	                        raise(1, startNodeOp, constant(10000));
 	                        raise(1, startNodeOp, constant(20000));
 	                        raise(1, startNodeOp, constant(30000));
@@ -199,7 +199,7 @@ public class ScenarioGeneld {
 	                observer.startAfterTerminationOf(0, setup);
 	                launchNodes.start();
 	                killNode.startAfterTerminationOf(5000, launchNodes);
-	                terminateAfterTerminationOf(10000, killNode);
+	                terminateAfterTerminationOf(5000, killNode);
 	            }
 	        };
 

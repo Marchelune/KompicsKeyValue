@@ -58,7 +58,6 @@ public class Client extends ComponentDefinition {
 	private ClassMatchedHandler<OperationACK, TMessage> handleOperationACK = new ClassMatchedHandler<OperationACK, TMessage>() {
 		@Override
 		public void handle(OperationACK content, TMessage context) {
-			logger.info(" client got answer");
 			if(!replies.contains(content)){
 				replies.add(content);
 				String info = "New reply : operation " + content.getOp().getUniqueSequenceNumber() 
@@ -81,7 +80,7 @@ public class Client extends ComponentDefinition {
 		@Override
 		public void handle(ConsoleLine event) {
 			String[] command = event.getLine().trim().split("[\\(,\\)]");
-			logger.info("{} (client): received a command : {}", self, command);
+			//logger.info("{} (client): received a command : {}", self, command);
 			sequenceNumber++;
 			if(command[0].equals("PUT")){
 				doPut(command,event);
