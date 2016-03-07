@@ -7,28 +7,80 @@ cd KeyValueStore
 mvn clean install
 cd ../
 
-echo "How many nodes ?"
-read nodesNumber
+echo "Give me the maximum key"
+read maxKey
+echo "How many partition do you want ? -- a positive devider of the maximum key number will be perfect."
+read partitions
+echo "Replication degree ?"
+read repDegree
 echo "Give me your Ip"
 read ip
 
-for (( i=1; i<=$nodesNumber; i++ ))
+sizePartition=$(($maxKey / $partitions))
+nodesNumber=$(($partitions*repDegree))
+
+###########################
+#Preparing ranks and ranges
+ranges=""
+declare -a ranks
+k=1
+for (( i=1; i<=$partitions ; i++ ))
 do
-echo $i
-mkdir temp/node$i
-cp KeyValueStore/target/KeyValueStore-0.0.1-SNAPSHOT-fat.jar temp/node$i
-cp launcher.sh temp/node$i
-cd temp/node$i
-pwd
-port=$(($i + 45670))
-echo "keyvaluestore.self.addr = \"$ip:$port\"" >> reference.conf
-echo "keyvaluestore.self.rank = $i" >> reference.conf
-echo "keyvaluestore.self.ranks = \"1;$ip:45671!2;$ip:45672!3;$ip:45673!4;$ip:45674!5;$ip:45675!6;$ip:45676\"" >> reference.conf
-echo "keyvaluestore.self.ranges = \"0:999;$ip:45671,$ip:45672,$ip:45673!1000:1999;$ip:45674,$ip:45675,$ip:45676\"" >> reference.conf
-echo "keyvaluestore.epfd.initDelay = 3000" >> reference.conf
-echo "keyvaluestore.epfd.deltaDelay = 800" >> reference.conf
-cd ../../
+tempRanges=""
+tempRanks=""
+for (( j=1; j<=$repDegree ; j++ ))
+do
+rank=$((k))
+port=$(($rank+45670))
+
+tempRanks+="$rank;$ip:$port!"
+tempRanges+="$ip:$port,"
+
+k=$((k+1))
 done
+range=$(((i-1)*$sizePartition+1))":"$((i*$sizePartition))
+tempRanges=${tempRanges%?}
+if [ $k -lt $nodesNumber ]
+then
+tempRanges+="!"
+fi
+ranges+="$range;$tempRanges"
+
+tempRanks=${tempRanks%?}
+ranks[$i]=$tempRanks
+done
+
+echo "Creating $nodesNumber nodes in temp"
+
+##############################################
+#Creating each node and writing each conf files
+k=1
+for (( i=1; i<=$partitions ; i++ ))
+do
+for (( j=1; j<=$repDegree ; j++ ))
+do
+rank=$((k))
+port=$(($rank + 45670))
+
+
+
+mkdir temp/node$rank
+cp KeyValueStore/target/KeyValueStore-0.0.1-SNAPSHOT-fat.jar temp/node$rank
+cp launcher.sh temp/node$rank
+cd temp/node$rank
+
+echo "keyvaluestore.self.addr=\"$ip:$port\"" >> reference.conf
+echo "keyvaluestore.self.rank=$rank" >> reference.conf
+echo "keyvaluestore.self.ranks=\"${ranks[$i]}\"" >> reference.conf
+echo "keyvaluestore.self.ranges=\"$ranges\"" >> reference.conf
+echo "keyvaluestore.epfd.initDelay=3000" >> reference.conf
+echo "keyvaluestore.epfd.deltaDelay=800" >> reference.conf
+cd ../../
+
+k=$((k+1))
+done
+done
+
 
 
 
