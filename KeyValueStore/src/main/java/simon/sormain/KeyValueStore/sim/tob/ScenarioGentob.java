@@ -19,6 +19,7 @@ import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.util.GlobalView;
 import simon.sormain.KeyValueStore.converters.MapRanks;
+import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.sim.multipaxos.NodeParentMultiPaxos;
 import simon.sormain.KeyValueStore.sim.multipaxos.NodeParentMultiPaxosProposer;
@@ -47,6 +48,21 @@ public class ScenarioGentob {
                 		gv.setValue("simulation.seqdecided4", new OpSequence());
                 		gv.setValue("simulation.seqdecided5", new OpSequence());
                 		gv.setValue("simulation.proposedcommands", new OpSequence());
+                		//eld
+                		try{
+	                		gv.setValue("simulation.leader1", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
+	                		gv.setValue("simulation.leader2", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
+	                		gv.setValue("simulation.leader3", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
+	                		gv.setValue("simulation.leader4", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
+	                		gv.setValue("simulation.leader5", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
+	                	} catch (UnknownHostException ex) {
+	                		throw new RuntimeException(ex);
+	                	}
+                		//epfd
+                		gv.setValue("simulation.suspected2", new SetTAddress());
+                		gv.setValue("simulation.suspected3", new SetTAddress());
+                		gv.setValue("simulation.suspected4", new SetTAddress());
+                		gv.setValue("simulation.suspected5", new SetTAddress());
                 }
             };
         }

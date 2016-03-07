@@ -21,4 +21,8 @@ public class SetTAddress {
 	public HashSet<TAddress> get(){
 		return set;
 	}
+	
+	public void set(HashSet<TAddress> s){
+		this.set = s;
+	}
 }

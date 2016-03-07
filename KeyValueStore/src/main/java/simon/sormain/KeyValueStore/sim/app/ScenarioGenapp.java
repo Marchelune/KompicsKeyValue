@@ -12,6 +12,7 @@ import se.sics.kompics.Init;
 import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
+import se.sics.kompics.simulator.adaptor.Operation1;
 import se.sics.kompics.simulator.adaptor.Operation2;
 
 import se.sics.kompics.simulator.events.system.SetupEvent;
@@ -19,6 +20,7 @@ import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.util.GlobalView;
 import simon.sormain.KeyValueStore.converters.MapRanges;
 import simon.sormain.KeyValueStore.converters.MapRanks;
+import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
 import simon.sormain.KeyValueStore.sim.multipaxos.OpSequence;
 import simon.sormain.KeyValueStore.sim.tob.OpSet;
@@ -63,6 +65,11 @@ public class ScenarioGenapp {
 	                	} catch (UnknownHostException ex) {
 	                		throw new RuntimeException(ex);
 	                	}
+                        //epfd
+                		gv.setValue("simulation.suspected2", new SetTAddress());
+                		gv.setValue("simulation.suspected3", new SetTAddress());
+                		gv.setValue("simulation.suspected4", new SetTAddress());
+                		gv.setValue("simulation.suspected5", new SetTAddress());
                 }
             };
         }
@@ -220,9 +227,9 @@ public class ScenarioGenapp {
         }
     };
     
-    static Operation startNodeClientOp = new Operation<StartNodeEvent>() {
+    static Operation1 startNodeClientOp = new Operation1<StartNodeEvent, Long>() {
 
-        public StartNodeEvent generate() {
+        public StartNodeEvent generate(final Long bool) {
             return new StartNodeEvent() {
                 TAddress selfAdr;
                 
@@ -253,7 +260,11 @@ public class ScenarioGenapp {
 
                 @Override
                 public Init getComponentInit() {
-                    return Init.NONE;
+                	if(bool == 0){
+                		return new ClientHostSimuInit(false);
+                	} else {
+                		return new ClientHostSimuInit(true);
+                	}
                 }
 
                 @Override
@@ -264,7 +275,7 @@ public class ScenarioGenapp {
         }
     };
     
-    public static SimulationScenario app() {
+    public static SimulationScenario appCASOK() {
         SimulationScenario scen = new SimulationScenario() {
             {
 
@@ -290,7 +301,7 @@ public class ScenarioGenapp {
                 SimulationScenario.StochasticProcess launchClient = new SimulationScenario.StochasticProcess() {
                     {
                     	eventInterArrivalTime(constant(1));
-                        raise(1, startNodeClientOp);
+                        raise(1, startNodeClientOp, constant(1));
                     }  
                 };
 
@@ -299,7 +310,49 @@ public class ScenarioGenapp {
                 setup.start();
                 launchNodes.start();
                 launchClient.startAfterTerminationOf(1000, launchNodes);
-                terminateAfterTerminationOf(40000, launchClient);
+                terminateAfterTerminationOf(20000, launchClient);
+            }
+        };
+
+        return scen;
+    }
+    
+    public static SimulationScenario appCASNOK() {
+        SimulationScenario scen = new SimulationScenario() {
+            {
+
+                SimulationScenario.StochasticProcess setup = new SimulationScenario.StochasticProcess() {
+                    {
+                        raise(1, setupOp);
+                    }
+                };
+
+
+                SimulationScenario.StochasticProcess launchNodes = new SimulationScenario.StochasticProcess() {
+                    {
+                    	eventInterArrivalTime(constant(1));
+                        raise(1, startNodeFirstRepGrpOp, constant(10000), constant(1));
+                        raise(1, startNodeFirstRepGrpOp, constant(20000), constant(2));
+                        raise(1, startNodeFirstRepGrpOp, constant(30000), constant(3));
+                        raise(1, startNodeSecondRepGrpOp, constant(40000), constant(4));
+                        raise(1, startNodeSecondRepGrpOp, constant(50000), constant(5));
+                        raise(1, startNodeSecondRepGrpOp, constant(60000), constant(6));
+                    }
+                };
+                
+                SimulationScenario.StochasticProcess launchClient = new SimulationScenario.StochasticProcess() {
+                    {
+                    	eventInterArrivalTime(constant(1));
+                        raise(1, startNodeClientOp, constant(0));
+                    }  
+                };
+
+
+
+                setup.start();
+                launchNodes.start();
+                launchClient.startAfterTerminationOf(1000, launchNodes);
+                terminateAfterTerminationOf(20000, launchClient);
             }
         };
 

@@ -17,9 +17,11 @@ import se.sics.kompics.timer.ScheduleTimeout;
 import se.sics.kompics.timer.Timeout;
 import se.sics.kompics.timer.Timer;
 import se.sics.kompics.ClassMatchedHandler;
+import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.*;
 
 import se.sics.kompics.network.Transport;
+import se.sics.kompics.simulator.util.GlobalView;
 
 public class Epfd extends ComponentDefinition {
 
@@ -99,6 +101,8 @@ public class Epfd extends ComponentDefinition {
 				//System.out.println("Hello, port "+ selfAddress);
 				trigger(new TMessage(selfAddress, p, Transport.TCP, new HeartbeatRequestMessage(seqnum)), net);
 			}
+			// Simu
+			Suspect();
 			
 			//logger.info("{} hello suspected: {}.", new Object[]{selfAddress, suspected});
 			//alive = new HashSet<TAddress>();
@@ -128,4 +132,36 @@ public class Epfd extends ComponentDefinition {
 			}	
 		}
 	};
+	
+	
+	
+	//Simu
+	private void Suspect() {
+        GlobalView gv = config().getValue("simulation.globalview", GlobalView.class);
+        TAddress selfaddr= config().getValue("keyvaluestore.self.addr", TAddress.class);
+        SetTAddress setSuspected;
+        switch (selfaddr.getPort()) {
+        case 20000 :
+        	setSuspected = gv.getValue("simulation.suspected2", SetTAddress.class);
+        	setSuspected.set(suspected);
+        	gv.setValue("simulation.suspected2", setSuspected);
+        	break;
+        case 30000 :
+        	setSuspected = gv.getValue("simulation.suspected3", SetTAddress.class);
+        	setSuspected.set(suspected);
+        	gv.setValue("simulation.suspected3", setSuspected);
+        	break;
+        case 40000 :
+        	setSuspected = gv.getValue("simulation.suspected4", SetTAddress.class);
+        	setSuspected.set(suspected);
+        	gv.setValue("simulation.suspected4", setSuspected);
+        	break;
+        case 50000 :
+        	setSuspected = gv.getValue("simulation.suspected5", SetTAddress.class);
+        	setSuspected.set(suspected);
+        	gv.setValue("simulation.suspected5", setSuspected);
+        	break;
+    		
+        }
+	}
 }

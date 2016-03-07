@@ -1,12 +1,15 @@
 package simon.sormain.KeyValueStore.app;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javassist.bytecode.Descriptor.Iterator;
 import se.sics.kompics.ClassMatchedHandler;
 import se.sics.kompics.ComponentDefinition;
 import se.sics.kompics.Handler;
@@ -65,7 +68,7 @@ public class Router extends ComponentDefinition{
 	private ClassMatchedHandler<PutOperation, TMessage> handleClientPutOperation = new ClassMatchedHandler<PutOperation, TMessage>() {
 		@Override
 		public void handle(PutOperation content, TMessage context) {
-			//logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			logger.info("{}: Got {} from {}. BEB broadcasting it. ", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}
@@ -74,7 +77,7 @@ public class Router extends ComponentDefinition{
 	private ClassMatchedHandler<GetOperation, TMessage> handleClientGetOperation = new ClassMatchedHandler<GetOperation, TMessage>() {
 		@Override
 		public void handle(GetOperation content, TMessage context) {
-			//logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			logger.info("{}: Got {} from {}. BEB broadcasting it. ", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}
@@ -83,7 +86,7 @@ public class Router extends ComponentDefinition{
 	private ClassMatchedHandler<CASOperation, TMessage> handleClientCASOperation = new ClassMatchedHandler<CASOperation, TMessage>() {
 		@Override
 		public void handle(CASOperation content, TMessage context) {
-			//logger.info("{}: Got {} from {}. BEB broadcasting it. \n", self, content.toString(), context.getSource());
+			logger.info("{}: Got {} from {}. BEB broadcasting it. ", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}
@@ -124,14 +127,23 @@ public class Router extends ComponentDefinition{
 	 */
 	private Set<TAddress> correspondingRG(int key){
 		Set<TAddress> result = cache.get(key);
+	    LinkedList<Integer> listUpperBounds = new LinkedList<Integer>();
+	    HashMap<Integer,int[]> mapUpperBoundRange = new HashMap<Integer,int[]>();
 		if(result == null){
 			for (Entry<int[], Set<TAddress>> entry : allRanges.entrySet()) {
 			    int[] range = entry.getKey();
-			    if(key<range[1]){
-			    	logger.debug("RANGE" + Integer.toString(range[1])); //test
-			    	result = entry.getValue();
-			    	break;
-			    }
+			    listUpperBounds.add(range[1]);
+			    mapUpperBoundRange.put(range[1], range);			    
+			}
+			Collections.sort(listUpperBounds);
+			int sizeListUpperBounds = listUpperBounds.size();
+			for(int i = 0; i< sizeListUpperBounds; i++){
+				int upperBound = listUpperBounds.get(i);
+				if(key<upperBound){
+					//logger.debug("RANGE" + Integer.toString(upperBound) + "\n"); //test
+					result = allRanges.get(mapUpperBoundRange.get(upperBound));
+					break;
+				}
 			}
 		}
 		return result;

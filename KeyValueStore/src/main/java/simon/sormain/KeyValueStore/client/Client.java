@@ -127,7 +127,7 @@ public class Client extends ComponentDefinition {
 		}else{
 			Operation op = new CASOperation(self, sequenceNumber, Integer.parseInt(command[1]),command[2],command[3]);
 			trigger( new TMessage(self, kvStore, Transport.TCP, op),net);
-			logger.info("{} (client): sending {} to {}", self, op.toString(), kvStore);
+			logger.info("{} (client): sending {} to {} n", self, op.toString(), kvStore);
 		}
 	}
 	

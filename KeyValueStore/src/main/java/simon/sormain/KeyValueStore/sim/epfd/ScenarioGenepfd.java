@@ -1,4 +1,4 @@
-package simon.sormain.KeyValueStore.sim.eld;
+package simon.sormain.KeyValueStore.sim.epfd;
 
 import static java.lang.Math.toIntExact;
 
@@ -19,28 +19,19 @@ import se.sics.kompics.simulator.util.GlobalView;
 import simon.sormain.KeyValueStore.converters.MapRanks;
 import simon.sormain.KeyValueStore.converters.SetTAddress;
 import simon.sormain.KeyValueStore.network.TAddress;
+import simon.sormain.KeyValueStore.sim.eld.NodeParenteld;
+import simon.sormain.KeyValueStore.sim.eld.SimulationObserverELD;
 
-public class ScenarioGeneld {
-
+public class ScenarioGenepfd {
 	 static Operation setupOp = new Operation<SetupEvent>() {
 	        public SetupEvent generate() {
 	            return new SetupEvent() {
 	                @Override
 	                public void setupGlobalView(GlobalView gv) {
-	                	try{
-	                		gv.setValue("simulation.leader1", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
-	                		gv.setValue("simulation.leader2", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
-	                		gv.setValue("simulation.leader3", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
-	                		gv.setValue("simulation.leader4", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
-	                		gv.setValue("simulation.leader5", new TAddress(InetAddress.getByName("0.0.0.0"), 0));
-	                	} catch (UnknownHostException ex) {
-	                		throw new RuntimeException(ex);
-	                	}
-	                	//epfd
-                		gv.setValue("simulation.suspected2", new SetTAddress());
-                		gv.setValue("simulation.suspected3", new SetTAddress());
-                		gv.setValue("simulation.suspected4", new SetTAddress());
-                		gv.setValue("simulation.suspected5", new SetTAddress());
+	                		gv.setValue("simulation.suspected2", new SetTAddress());
+	                		gv.setValue("simulation.suspected3", new SetTAddress());
+	                		gv.setValue("simulation.suspected4", new SetTAddress());
+	                		gv.setValue("simulation.suspected5", new SetTAddress());
 	                }
 	            };
 	        }
@@ -73,7 +64,7 @@ public class ScenarioGeneld {
 
 	                @Override
 	                public Class getComponentDefinition() {
-	                    return SimulationObserverELD.class;
+	                    return SimulationObserverepfd.class;
 	                }
 
 	                @Override
@@ -124,7 +115,7 @@ public class ScenarioGeneld {
 
 	                @Override
 	                public Class getComponentDefinition() {
-	                    return NodeParenteld.class;
+	                    return NodeParentepfd.class;
 	                }
 
 	                @Override
@@ -166,7 +157,7 @@ public class ScenarioGeneld {
 	        }
 	    };
 	    
-	    public static SimulationScenario eld() {
+	    public static SimulationScenario epfd() {
 	        SimulationScenario scen = new SimulationScenario() {
 	            {
 

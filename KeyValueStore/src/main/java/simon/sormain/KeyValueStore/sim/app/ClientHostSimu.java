@@ -20,10 +20,13 @@ import simon.sormain.KeyValueStore.client.ConsolePort;
 import simon.sormain.KeyValueStore.network.TAddress;
 
 public class ClientHostSimu extends ComponentDefinition {
-	public ClientHostSimu() {
+	boolean CAS;
+	public ClientHostSimu(ClientHostSimuInit init) {
 		
 	    Positive<Network> network = requires(Network.class);
 	    Positive<Timer> timer = requires(Timer.class);
+	    CAS = init.getCAS();
+
 		
 		try {
 			TAddress self = new TAddress(InetAddress.getByName("192.168.0.1"), 15000);
@@ -32,7 +35,8 @@ public class ClientHostSimu extends ComponentDefinition {
 			//create and connect all components except timer and network
 			Component putter = create(CreateCommandsComponent.class, new CreateCommandsInit("PUT",2000));
 			Component getter = create(CreateCommandsComponent.class, new CreateCommandsInit("GET",4000));
-			Component caser = create(CreateCommandsComponent.class, new CreateCommandsInit("CAS",6000));
+			Component caser = create(CreateCommandsComponent.class, new CreateCommandsInit("CAS",6000,CAS));
+			Component getCaser = create(CreateCommandsComponent.class, new CreateCommandsInit("GET",8000));
 			Component client = create(Client.class, new ClientInit(self, kvStore));
 			
 			//connect required internal components to network and timer
@@ -40,10 +44,12 @@ public class ClientHostSimu extends ComponentDefinition {
 			connect(client.getNegative(ConsolePort.class) , putter.getPositive(ConsolePort.class), Channel.TWO_WAY);
 			connect(client.getNegative(ConsolePort.class) , getter.getPositive(ConsolePort.class), Channel.TWO_WAY);
 			connect(client.getNegative(ConsolePort.class) , caser.getPositive(ConsolePort.class), Channel.TWO_WAY);
+			connect(client.getNegative(ConsolePort.class) , getCaser.getPositive(ConsolePort.class), Channel.TWO_WAY);
 			
 			connect(putter.getNegative(Timer.class), timer, Channel.TWO_WAY);
 			connect(getter.getNegative(Timer.class), timer, Channel.TWO_WAY);
 			connect(caser.getNegative(Timer.class), timer, Channel.TWO_WAY);
+			connect(getCaser.getNegative(Timer.class), timer, Channel.TWO_WAY);
 			
 		} catch (UnknownHostException e) {
 			e.printStackTrace();

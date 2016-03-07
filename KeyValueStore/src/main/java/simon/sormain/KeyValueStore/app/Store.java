@@ -65,7 +65,7 @@ private static final Logger logger = LoggerFactory.getLogger(Store.class);
 	private ClassMatchedHandler<PutOperation, TobDeliver> handlePut = new ClassMatchedHandler<PutOperation, TobDeliver>() {	
 		@Override
 		public void handle(PutOperation content, TobDeliver context) {
-			logger.info("Performing " + content.toString());
+			logger.info("{} :Performing " + content.toString(), self);
 			storedValues.put(content.getKey(), content.getValue());
 			trigger(new TMessage(self, content.getClient(), Transport.TCP, 
 					new OperationACK(content, Status.SUCCESS, content.getValue())), net);
@@ -76,7 +76,7 @@ private static final Logger logger = LoggerFactory.getLogger(Store.class);
 	private ClassMatchedHandler<GetOperation, TobDeliver> handleGet = new ClassMatchedHandler<GetOperation, TobDeliver>() {
 		@Override
 		public void handle(GetOperation content, TobDeliver context) {
-			logger.info("Performing " + content.toString());
+			logger.info("{} :Performing " + content.toString(), self);
 			String result = storedValues.get(content.getKey());
 			if(result != null){
 				trigger(new TMessage(self, content.getClient(), Transport.TCP, 
@@ -94,7 +94,7 @@ private static final Logger logger = LoggerFactory.getLogger(Store.class);
 	private ClassMatchedHandler<CASOperation, TobDeliver> handleCAS = new ClassMatchedHandler<CASOperation, TobDeliver>() {
 		@Override
 		public void handle(CASOperation content, TobDeliver context) {
-			logger.info("Performing " + content.toString());
+			logger.info("{} :Performing " + content.toString(), self);
 			String result = storedValues.get(content.getKey());
 			if(result != null){
 				if(result.equals(content.getReferenceValue())){

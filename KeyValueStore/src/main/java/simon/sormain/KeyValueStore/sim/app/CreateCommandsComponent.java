@@ -27,6 +27,7 @@ public class CreateCommandsComponent extends ComponentDefinition {
 	private int seqnum;
 	long period;
 	String typeOp;
+	boolean CAS;
 	
 	
 	public CreateCommandsComponent(CreateCommandsInit init) {
@@ -34,6 +35,7 @@ public class CreateCommandsComponent extends ComponentDefinition {
     	subscribe(handleSendTimeout, timer);
     	period = init.getPeriod();
     	typeOp = init.getTypeOp();
+    	CAS = init.getCAS();
 	}
 	
 	Handler<Start> handleStart = new Handler<Start>() {
@@ -55,12 +57,12 @@ public class CreateCommandsComponent extends ComponentDefinition {
         	seqnum++;
         	int res;
         	if (seqnum % 2 == 0) {
-        		  // even
+        		// even
         		res = seqnum;
-        		} else {
-        		  // odd
-        			res = seqnum + 1000;
-        		}
+        	} else {
+        		// odd
+        		res = seqnum + 1000;
+        	}
         	String op = null;
         	String op2 = null;
         	if(typeOp.equals("PUT")){
@@ -68,13 +70,14 @@ public class CreateCommandsComponent extends ComponentDefinition {
         	} else if(typeOp.equals("GET")) {
         		op = typeOp + "(" + Integer.toString(res) + ")";
         	} else if(typeOp.equals("CAS")) {
-        		op =typeOp + "(" + Integer.toString(res) +",kvstore"+Integer.toString(res)+",CAS"+Integer.toString(res)+")";
-        		op2 = typeOp + "(" + Integer.toString(res) + ")";
+        		if(CAS){
+        			op =typeOp + "(" + Integer.toString(res) +",kvstore"+Integer.toString(res)+",CAS"+Integer.toString(res)+")";
+        		} else {
+        			op =typeOp + "(" + Integer.toString(res) +",fail"+Integer.toString(res)+",CAS"+Integer.toString(res)+")";
+        		}
         	} 
         	trigger(new ConsoleLine(op) , console);
-        	if(typeOp.equals("CAS")){
-        		//trigger(new ConsoleLine(op2) , console);
-        	}
+
         }
     };
     
