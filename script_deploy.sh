@@ -62,8 +62,6 @@ do
 rank=$((k))
 port=$(($rank + 45670))
 
-
-
 mkdir temp/node$rank
 cp KeyValueStore/target/KeyValueStore-0.0.1-SNAPSHOT-fat.jar temp/node$rank
 cp launcher.sh temp/node$rank
@@ -75,8 +73,8 @@ echo "keyvaluestore.self.ranks=\"${ranks[$i]}\"" >> reference.conf
 echo "keyvaluestore.self.ranges=\"$ranges\"" >> reference.conf
 echo "keyvaluestore.epfd.initDelay=3000" >> reference.conf
 echo "keyvaluestore.epfd.deltaDelay=800" >> reference.conf
-cd ../../
 
+cd ../../
 k=$((k+1))
 done
 done

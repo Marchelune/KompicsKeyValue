@@ -34,18 +34,7 @@ import simon.sormain.KeyValueStore.network.TMessage;
 public class ClientHost extends ComponentDefinition {
 	
     static {
-    	/*
-    	// register
-    	
-        Serializers.register(new NetSerializer(), "netS");
-        Serializers.register(new EPFDSerializer(), "epfdS");
-        // map
-        Serializers.register(TAddress.class, "netS");
-        Serializers.register(THeader.class, "netS");
-        Serializers.register(TMessage.class, "netS");
-        Serializers.register(HeartbeatReplyMessage.class, "epfdS");
-        Serializers.register(HeartbeatRequestMessage.class, "epfdS");
-        */
+
         // conversions
         Conversions.register(new TAddressConverter());
         Conversions.register(new SetTAddressConverter());

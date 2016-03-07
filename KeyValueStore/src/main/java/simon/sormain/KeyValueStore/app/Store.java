@@ -49,7 +49,7 @@ private static final Logger logger = LoggerFactory.getLogger(Store.class);
 	private Handler<Start> handleStart = new Handler<Start>() {
 		@Override
 		public void handle(Start event) {
-			// TODO Auto-generated method stub
+			storedValues = new TreeMap<Integer, String>();
 			
 		}
 	};
