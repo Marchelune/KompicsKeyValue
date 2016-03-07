@@ -1,6 +1,8 @@
 package simon.sormain.KeyValueStore.app;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -41,8 +43,12 @@ public class Router extends ComponentDefinition{
 	
 	public Router(RouterInit init) {
 		subscribe(handleStart, control);
-		subscribe(handleClientOperation,net);
-		subscribe(handleBEDOperation, beb);
+		subscribe(handleClientPutOperation, net);
+		subscribe(handleClientGetOperation, net);
+		subscribe(handleClientCASOperation, net);
+		subscribe(handleBEDPutOperation, beb);
+		subscribe(handleBEDGetOperation, beb);
+		subscribe(handleBEDCASOperation, beb);
 		
 		allRanges = init.getAllRanges();
 		self = init.getSelf();
@@ -56,17 +62,55 @@ public class Router extends ComponentDefinition{
 		}
 	};
 	
-	private ClassMatchedHandler<Operation, TMessage> handleClientOperation = new ClassMatchedHandler<Operation, TMessage>() {
+	private ClassMatchedHandler<PutOperation, TMessage> handleClientPutOperation = new ClassMatchedHandler<PutOperation, TMessage>() {
 		@Override
-		public void handle(Operation content, TMessage context) {
+		public void handle(PutOperation content, TMessage context) {
+			//logger.info("{}: Got {} from {}. BEB broadcasting it. ", self, content.toString(), context.getSource());
 			Set<TAddress> dst = correspondingRG(content.getKey());
 			trigger(new BEBroadcast(self, dst , content), beb);
 		}
 	};
 	
-	private ClassMatchedHandler<Operation, BEDeliver> handleBEDOperation = new ClassMatchedHandler<Operation, BEDeliver>() {
+	private ClassMatchedHandler<GetOperation, TMessage> handleClientGetOperation = new ClassMatchedHandler<GetOperation, TMessage>() {
 		@Override
-		public void handle(Operation content, BEDeliver context) {
+		public void handle(GetOperation content, TMessage context) {
+			//logger.info("{}: Got {} from {}. BEB broadcasting it. ", self, content.toString(), context.getSource());
+			Set<TAddress> dst = correspondingRG(content.getKey());
+			trigger(new BEBroadcast(self, dst , content), beb);
+		}
+	};
+	
+	private ClassMatchedHandler<CASOperation, TMessage> handleClientCASOperation = new ClassMatchedHandler<CASOperation, TMessage>() {
+		@Override
+		public void handle(CASOperation content, TMessage context) {
+			//logger.info("{}: Got {} from {}. BEB broadcasting it. ", self, content.toString(), context.getSource());
+			Set<TAddress> dst = correspondingRG(content.getKey());
+			trigger(new BEBroadcast(self, dst , content), beb);
+		}
+	};
+	
+	private ClassMatchedHandler<PutOperation, BEDeliver> handleBEDPutOperation = new ClassMatchedHandler<PutOperation, BEDeliver>() {
+		@Override
+		public void handle(PutOperation content, BEDeliver context) {
+			//logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
+			trigger(content, routy);
+			
+		}
+	};
+	
+	private ClassMatchedHandler<GetOperation, BEDeliver> handleBEDGetOperation = new ClassMatchedHandler<GetOperation, BEDeliver>() {
+		@Override
+		public void handle(GetOperation content, BEDeliver context) {
+			//logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
+			trigger(content, routy);
+			
+		}
+	};
+	
+	private ClassMatchedHandler<CASOperation, BEDeliver> handleBEDCASOperation = new ClassMatchedHandler<CASOperation, BEDeliver>() {
+		@Override
+		public void handle(CASOperation content, BEDeliver context) {
+			logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
 			trigger(content, routy);
 			
 		}
@@ -79,13 +123,23 @@ public class Router extends ComponentDefinition{
 	 */
 	private Set<TAddress> correspondingRG(int key){
 		Set<TAddress> result = cache.get(key);
+	    LinkedList<Integer> listUpperBounds = new LinkedList<Integer>();
+	    HashMap<Integer,int[]> mapUpperBoundRange = new HashMap<Integer,int[]>();
 		if(result == null){
 			for (Entry<int[], Set<TAddress>> entry : allRanges.entrySet()) {
 			    int[] range = entry.getKey();
-			    if(key<range[1]){
-			    	result = entry.getValue();
-			    	break;
-			    }
+			    listUpperBounds.add(range[1]);
+			    mapUpperBoundRange.put(range[1], range);			    
+			}
+			Collections.sort(listUpperBounds);
+			int sizeListUpperBounds = listUpperBounds.size();
+			for(int i = 0; i< sizeListUpperBounds; i++){
+				int upperBound = listUpperBounds.get(i);
+				if(key<upperBound){
+					//logger.debug("RANGE" + Integer.toString(upperBound) + "\n"); //test
+					result = allRanges.get(mapUpperBoundRange.get(upperBound));
+					break;
+				}
 			}
 		}
 		return result;

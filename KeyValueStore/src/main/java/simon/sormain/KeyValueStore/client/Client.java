@@ -53,6 +53,7 @@ public class Client extends ComponentDefinition {
 		public void handle(Start event) {
 			logger.info("Client started.");
 			sequenceNumber = 0;
+			replies = new HashSet<OperationACK>();
 		}
 	};
 	
