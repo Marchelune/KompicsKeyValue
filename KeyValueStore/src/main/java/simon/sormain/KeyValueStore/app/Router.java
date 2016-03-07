@@ -110,7 +110,7 @@ public class Router extends ComponentDefinition{
 	private ClassMatchedHandler<CASOperation, BEDeliver> handleBEDCASOperation = new ClassMatchedHandler<CASOperation, BEDeliver>() {
 		@Override
 		public void handle(CASOperation content, BEDeliver context) {
-			logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
+			//logger.info("{}: Got {} from {}. Delivering it to the store. \n", self, content.toString(), context.getSrc());
 			trigger(content, routy);
 			
 		}
