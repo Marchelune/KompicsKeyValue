@@ -45,8 +45,8 @@ public class ClientHost extends ComponentDefinition {
 	public ClientHost() {
 		
 		try {
-			TAddress self = new TAddress(InetAddress.getByName("192.168.1.4"), 45000);
-			TAddress kvStore = new TAddress(InetAddress.getByName("192.168.1.4"), 45671);
+			TAddress self = new TAddress(InetAddress.getByName("192.168.1.3"), 44000);
+			TAddress kvStore = new TAddress(InetAddress.getByName("192.168.1.3"), 45673);
 			
 			Component network = create(NettyNetwork.class, new NettyInit(self));
 			Component console = create(JavaConsole.class, Init.NONE);

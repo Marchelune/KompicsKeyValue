@@ -9,7 +9,7 @@ cd ../
 
 echo "Give me the maximum key"
 read maxKey
-echo "How many partition do you want ? -- a positive devider of the maximum key number will be perfect."
+echo "How many partitions do you want ? -- a positive devider of the maximum key number will be perfect."
 read partitions
 echo "Replication degree ?"
 read repDegree

@@ -88,7 +88,9 @@ public class Epfd extends ComponentDefinition {
 				TAddress p = i.next();
 				if(!(alive.contains(p)) && !(suspected.contains(p)) ){
 					suspected.add(p);
-					//logger.info("{} suspects: {}.", new Object[]{selfAddress, p});
+					if(suspected.size() > (int) allAddresses.size() /2){
+						logger.warn("WARNING : Some partitions might be temporarily or permatently unavailables.");
+					}
 					trigger(new Suspect(p), epfd);
 				}else if(intersection.contains(p)){
 					suspected.remove(p);
