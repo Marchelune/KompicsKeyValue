@@ -64,7 +64,7 @@ port=$(($rank + 45670))
 
 mkdir temp/node$rank
 cp KeyValueStore/target/KeyValueStore-0.0.1-SNAPSHOT-fat.jar temp/node$rank
-cp launcher.sh temp/node$rank
+cp individualLauncher.sh temp/node$rank
 cd temp/node$rank
 
 echo "keyvaluestore.self.addr=\"$ip:$port\"" >> reference.conf
@@ -79,6 +79,13 @@ k=$((k+1))
 done
 done
 
+##############################################
+#Configuring client
+cd client/
+rm reference.conf
+echo "keyvaluestore.self.addr=\"$ip:44444\"" >> reference.conf
+echo "keyvaluestore.kvstore.addr=\"$ip:$port\"" >> reference.conf
 
+echo "#########Done !###########"
 
 

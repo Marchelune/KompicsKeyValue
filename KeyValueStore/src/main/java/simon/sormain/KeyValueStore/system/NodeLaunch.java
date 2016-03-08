@@ -18,6 +18,7 @@ import simon.sormain.KeyValueStore.network.TAddress;
 import se.sics.kompics.config.*;
 import se.sics.kompics.config.Config.Builder;
 
+@Deprecated
 public class NodeLaunch extends ComponentDefinition {
 
 	public NodeLaunch() {
